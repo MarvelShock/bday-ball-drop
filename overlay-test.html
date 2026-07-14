@@ -2,289 +2,522 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Birthday Overlay – Test</title>
+  <title>Birthday Overlay — Test</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    html,body{width:900px;height:600px;overflow:hidden;background:#06020f;font-family:'Quicksand',sans-serif;}
+    html,body{width:900px;min-height:600px;overflow-x:hidden;background:transparent;font-family:'Quicksand',sans-serif;}
     #scene{position:relative;width:900px;height:600px;overflow:hidden;}
-    #bg-glow{
-      position:absolute;inset:0;
-      background:
-        radial-gradient(ellipse 700px 320px at 50% 110%,rgba(244,114,182,.22) 0%,transparent 70%),
-        radial-gradient(ellipse 500px 220px at 15% 0%, rgba(96,165,250,.14)   0%,transparent 70%),
-        radial-gradient(ellipse 500px 220px at 85% 0%, rgba(244,114,182,.12)  0%,transparent 70%);
-      pointer-events:none;z-index:1;
+
+    /* ── Zone cards ── */
+    #countdown-wrap{
+      position:absolute;top:10px;left:50%;
+      transform:translateX(-50%);
+      z-index:20;width:890px;
     }
-    #countdown-wrap{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:20;width:780px;height:96px;perspective:800px;}
-    #tz-row{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;}
+    #tz-row{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      flex-wrap:nowrap;
+    }
     .tz-block{
-      background:rgba(10,0,30,.72);border:1px solid rgba(244,114,182,.3);border-radius:14px;
-      padding:9px 14px;text-align:center;min-width:164px;backdrop-filter:blur(6px);
-      box-shadow:0 0 12px rgba(244,114,182,.1),inset 0 1px 0 rgba(255,255,255,.06);
+      background:rgba(10,0,30,.70);
+      border:1px solid rgba(244,114,182,.3);
+      border-radius:12px;padding:7px 11px;
+      text-align:center;min-width:120px;max-width:145px;
+      backdrop-filter:blur(6px);
       transition:border-color .4s,box-shadow .4s,opacity .4s,transform .4s;
+      flex-shrink:0;
     }
     .tz-block.next-up{
-      border-color:rgba(96,165,250,.8);
-      box-shadow:0 0 22px rgba(96,165,250,.35),inset 0 1px 0 rgba(255,255,255,.09);
-      transform:scale(1.05);
+      border-color:rgba(96,165,250,.85);
+      box-shadow:0 0 18px rgba(96,165,250,.4);
+      transform:scale(1.07);
     }
     .tz-block.dropping{
       border-color:rgba(244,114,182,.95);
-      box-shadow:0 0 28px rgba(244,114,182,.55),inset 0 1px 0 rgba(255,255,255,.1);
-      transform:scale(1.08);
+      box-shadow:0 0 26px rgba(244,114,182,.6);
+      transform:scale(1.10);
     }
-    .tz-block.done-tz{opacity:.38;transform:scale(.96);}
-    .tz-label{font-size:.6rem;color:#f9a8d4;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+    .tz-block.done-tz{opacity:.32;transform:scale(.95);}
+    .tz-label{font-size:.55rem;color:#f9a8d4;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:2px;line-height:1.2;}
     .tz-block.next-up .tz-label{color:#93c5fd;}
     .tz-block.dropping .tz-label{color:#fff;}
-    .tz-time{font-size:1.45rem;font-weight:700;color:#fff;letter-spacing:2px;font-variant-numeric:tabular-nums;}
+    .tz-time{font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:1.5px;font-variant-numeric:tabular-nums;}
     .tz-time.hit{color:#f472b6;}
+
+    /* ── Arriving banner ── */
     #arriving-banner{
-      position:absolute;top:118px;left:50%;transform:translateX(-50%);
-      z-index:22;font-size:.85rem;font-weight:700;
+      position:absolute;top:110px;left:50%;
+      transform:translateX(-50%);
+      z-index:22;
+      font-size:.82rem;font-weight:700;
       color:#f9a8d4;letter-spacing:1px;text-transform:uppercase;
-      opacity:0;transition:opacity .5s;white-space:nowrap;
+      opacity:0;transition:opacity .5s;
+      white-space:nowrap;
       text-shadow:0 0 10px rgba(244,114,182,.6);
     }
     #arriving-banner.show{opacity:1;}
+
+    /* ── Progress dots ── */
     #progress-dots{
-      position:absolute;top:126px;left:50%;transform:translateX(-50%);
-      display:flex;gap:8px;z-index:22;
+      position:absolute;top:118px;left:50%;
+      transform:translateX(-50%);
+      display:flex;gap:6px;z-index:22;
+      flex-wrap:wrap;justify-content:center;max-width:860px;
     }
-    .pdot{width:10px;height:10px;border-radius:50%;background:rgba(244,114,182,.25);transition:background .4s,box-shadow .4s;}
-    .pdot.done-dot{background:#f472b6;box-shadow:0 0 8px #f472b6;}
+    .pdot{width:9px;height:9px;border-radius:50%;background:rgba(244,114,182,.22);transition:background .4s,box-shadow .4s;}
+    .pdot.done-dot{background:#f472b6;box-shadow:0 0 7px #f472b6;}
     .pdot.next-dot{background:#93c5fd;box-shadow:0 0 6px #93c5fd;}
-    #pole{position:absolute;left:50%;top:0;transform:translateX(-50%);width:3px;height:480px;
+
+    /* ── Pole ── */
+    #pole{
+      position:absolute;left:50%;top:0;
+      transform:translateX(-50%);
+      width:3px;height:480px;
       background:linear-gradient(to bottom,#ec4899 0%,#3b82f6 60%,#1e1b4b 100%);
-      border-radius:2px;box-shadow:0 0 8px rgba(236,72,153,.4);z-index:13;}
-    #ball{position:absolute;left:50%;top:0;transform:translate(-50%,-50%);
+      border-radius:2px;box-shadow:0 0 8px rgba(236,72,153,.4);z-index:13;
+    }
+    /* ── Ball ── */
+    #ball{
+      position:absolute;left:50%;top:0;
+      transform:translate(-50%,-50%);
       width:54px;height:54px;border-radius:50%;
       background:radial-gradient(circle at 35% 35%,#fff 4%,#fbcfe8 22%,#ec4899 52%,#1d4ed8 100%);
       box-shadow:0 0 18px 5px rgba(236,72,153,.7),0 0 40px 10px rgba(59,130,246,.35);
-      z-index:16;}
-    #message{position:absolute;bottom:54px;left:50%;transform:translateX(-50%);
-      font-size:2.75rem;font-weight:700;
+      z-index:16;
+    }
+    /* ── Message ── */
+    #message{
+      position:absolute;bottom:50px;left:50%;
+      transform:translateX(-50%);
+      font-size:2.6rem;font-weight:700;
       background:linear-gradient(135deg,#f472b6,#60a5fa,#f9a8d4,#93c5fd);
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       text-align:center;white-space:nowrap;
-      opacity:0;transition:opacity 1s ease .4s;z-index:25;
-      filter:drop-shadow(0 0 14px rgba(244,114,182,.8));}
+      opacity:0;transition:opacity 1s ease .4s;
+      z-index:25;filter:drop-shadow(0 0 14px rgba(244,114,182,.8));
+    }
     #message.show{opacity:1;}
     canvas{position:absolute;top:0;left:0;width:900px;height:600px;pointer-events:none;}
     #fireworks-canvas{z-index:10;}#confetti-canvas{z-index:11;}#sparkle-canvas{z-index:12;}
-    #test-btn{
-      position:absolute;bottom:14px;right:14px;z-index:30;
-      background:linear-gradient(135deg,#db2777,#2563eb);
-      color:#fff;border:none;border-radius:12px;padding:12px 24px;
-      font-size:1rem;font-weight:700;cursor:pointer;
-      font-family:'Quicksand',sans-serif;
-      box-shadow:0 4px 20px rgba(244,114,182,.5);transition:opacity .2s;
+
+    /* ── TEST CONTROLS ── */
+    #test-controls{
+      position:fixed;bottom:0;left:0;right:0;
+      background:rgba(10,0,30,.92);
+      border-top:1px solid rgba(244,114,182,.3);
+      padding:10px 16px;
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+      z-index:200;
+      font-size:.78rem;
     }
-    #test-btn:hover{opacity:.87;}
-    /* Test mode zone selector */
-    #test-zone-btns{
-      position:absolute;bottom:14px;left:14px;z-index:30;
-      display:flex;gap:6px;
+    #test-controls label{
+      color:#f9a8d4;font-weight:700;white-space:nowrap;
     }
-    .tz-test-btn{
-      background:rgba(10,0,30,.85);border:1px solid rgba(244,114,182,.4);
-      color:#f9a8d4;border-radius:8px;padding:7px 12px;
-      font-size:.75rem;font-weight:700;cursor:pointer;
-      font-family:'Quicksand',sans-serif;transition:background .2s;
+    #test-controls button{
+      background:rgba(244,114,182,.18);
+      border:1px solid rgba(244,114,182,.5);
+      color:#fff;border-radius:8px;padding:6px 14px;
+      font-family:'Quicksand',sans-serif;font-size:.78rem;font-weight:700;
+      cursor:pointer;transition:background .2s;
+      white-space:nowrap;
     }
-    .tz-test-btn:hover{background:rgba(244,114,182,.15);}
+    #test-controls button:hover{background:rgba(244,114,182,.38);}
+    #tz-select{
+      background:rgba(10,0,30,.8);
+      border:1px solid rgba(96,165,250,.4);
+      color:#fff;border-radius:8px;padding:5px 10px;
+      font-family:'Quicksand',sans-serif;font-size:.76rem;
+      max-width:200px;
+    }
+    #status-label{
+      color:#93c5fd;font-size:.72rem;
+      margin-left:auto;
+    }
   </style>
 </head>
 <body>
 <div id="scene">
-  <div id="bg-glow"></div>
   <canvas id="fireworks-canvas" width="900" height="600"></canvas>
   <canvas id="confetti-canvas"  width="900" height="600"></canvas>
   <canvas id="sparkle-canvas"   width="900" height="600"></canvas>
-  <div id="countdown-wrap"><div id="tz-row"></div></div>
+
+  <div id="countdown-wrap">
+    <div id="tz-row"></div>
+  </div>
   <div id="arriving-banner"></div>
   <div id="progress-dots"></div>
+
   <div id="pole"></div>
   <div id="ball"></div>
   <div id="message">🎉 Happy Birthday Nicole! 🎂</div>
-  <div id="test-zone-btns"></div>
-  <button id="test-btn">🎉 Test Final Drop</button>
 </div>
+
+<!-- TEST CONTROLS -->
+<div id="test-controls">
+  <label>🧪 Test Controls:</label>
+  <button id="btn-celebrate">🎉 Full Celebration</button>
+  <button id="btn-step">⏭ Step Next Zone</button>
+  <select id="tz-select"></select>
+  <button id="btn-sim-zone">▶ Simulate Zone</button>
+  <button id="btn-reset">↺ Reset All</button>
+  <span id="status-label">Zone 1 / ?</span>
+</div>
+
 <script>
-const BDAY_MONTH=7,BDAY_DAY=16;
-const ZONES=[
-  {label:'Eastern', abbr:'ET',tz:'America/New_York'},
-  {label:'Central', abbr:'CT',tz:'America/Chicago'},
-  {label:'Mountain',abbr:'MT',tz:'America/Denver'},
-  {label:'Pacific', abbr:'PT',tz:'America/Los_Angeles'},
+// ═══════════════════════════════════════════════════════════════
+// WORLDWIDE TIMEZONE SEQUENCE — identical to overlay.html
+// ═══════════════════════════════════════════════════════════════
+const BDAY_MONTH = 7;
+const BDAY_DAY   = 16;
+
+const ZONES = [
+  { label:'Kiritimati',    abbr:'LINT',  tz:'Pacific/Kiritimati'     },
+  { label:'Samoa',         abbr:'WST',   tz:'Pacific/Apia'           },
+  { label:'Tonga',         abbr:'TOT',   tz:'Pacific/Tongatapu'      },
+  { label:'Auckland',      abbr:'NZST',  tz:'Pacific/Auckland'       },
+  { label:'Fiji',          abbr:'FJT',   tz:'Pacific/Fiji'           },
+  { label:'Sydney',        abbr:'AEST',  tz:'Australia/Sydney'       },
+  { label:'Tokyo',         abbr:'JST',   tz:'Asia/Tokyo'             },
+  { label:'Beijing',       abbr:'CST',   tz:'Asia/Shanghai'          },
+  { label:'Bangkok',       abbr:'ICT',   tz:'Asia/Bangkok'           },
+  { label:'Dhaka',         abbr:'BST',   tz:'Asia/Dhaka'             },
+  { label:'Karachi',       abbr:'PKT',   tz:'Asia/Karachi'           },
+  { label:'Dubai',         abbr:'GST',   tz:'Asia/Dubai'             },
+  { label:'Moscow',        abbr:'MSK',   tz:'Europe/Moscow'          },
+  { label:'Nairobi',       abbr:'EAT',   tz:'Africa/Nairobi'         },
+  { label:'Istanbul',      abbr:'TRT',   tz:'Europe/Istanbul'        },
+  { label:'Cairo',         abbr:'EET',   tz:'Africa/Cairo'           },
+  { label:'Paris',         abbr:'CEST',  tz:'Europe/Paris'           },
+  { label:'Lagos',         abbr:'WAT',   tz:'Africa/Lagos'           },
+  { label:'London',        abbr:'BST',   tz:'Europe/London'          },
+  { label:'Reykjavik',     abbr:'GMT',   tz:'Atlantic/Reykjavik'     },
+  { label:'Azores',        abbr:'AZOT',  tz:'Atlantic/Azores'        },
+  { label:'Praia',         abbr:'CVT',   tz:'Atlantic/Cape_Verde'    },
+  { label:'São Paulo',     abbr:'BRT',   tz:'America/Sao_Paulo'      },
+  { label:'Buenos Aires',  abbr:'ART',   tz:'America/Argentina/Buenos_Aires' },
+  { label:'Halifax',       abbr:'ADT',   tz:'America/Halifax'        },
+  { label:'New York',      abbr:'EDT',   tz:'America/New_York'       },
+  { label:'Chicago',       abbr:'CDT',   tz:'America/Chicago'        },
+  { label:'Denver',        abbr:'MDT',   tz:'America/Denver'         },
+  { label:'Phoenix',       abbr:'MST',   tz:'America/Phoenix'        },
+  { label:'Los Angeles',   abbr:'PDT',   tz:'America/Los_Angeles'    },
+  { label:'Anchorage',     abbr:'AKDT',  tz:'America/Anchorage'      },
+  { label:'Honolulu',      abbr:'HST',   tz:'Pacific/Honolulu'       },
+  { label:'Pago Pago',     abbr:'SST',   tz:'Pacific/Pago_Pago'      },
+  { label:'Baker Is.',     abbr:'AoE',   tz:'Etc/GMT+12'             },
 ];
-function tzMidnight(tz){
-  const fmt=new Intl.DateTimeFormat('en-US',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-  let lo=new Date(Date.UTC(new Date().getFullYear(),BDAY_MONTH-1,BDAY_DAY)-14*3600e3);
-  let hi=new Date(+lo+28*3600e3);
-  for(let i=0;i<48;i++){
-    const mid=new Date((+lo+ +hi)/2);
-    const p={};fmt.formatToParts(mid).forEach(x=>p[x.type]=x.value);
-    const mo=+p.month,d=+p.day,h=+p.hour,m=+p.minute,s=+p.second;
-    if(mo===BDAY_MONTH&&d===BDAY_DAY&&h===0&&m===0&&s===0)return mid;
-    const past=mo>BDAY_MONTH||(mo===BDAY_MONTH&&d>BDAY_DAY)||(mo===BDAY_MONTH&&d===BDAY_DAY&&(h>0||m>0||s>0));
-    if(past)hi=mid;else lo=mid;
+
+function tzMidnight(tz) {
+  const year = new Date().getFullYear();
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false
+  });
+  let lo = new Date(Date.UTC(year, BDAY_MONTH-1, BDAY_DAY) - 15*3600e3);
+  let hi = new Date(+lo + 30*3600e3);
+  for (let i = 0; i < 52; i++) {
+    const mid = new Date((+lo + +hi) / 2);
+    const p = {};
+    fmt.formatToParts(mid).forEach(x => p[x.type] = x.value);
+    const mo=+p.month, d=+p.day, h=+p.hour, m=+p.minute, s=+p.second;
+    const past = mo > BDAY_MONTH || (mo===BDAY_MONTH && d>BDAY_DAY) ||
+                 (mo===BDAY_MONTH && d===BDAY_DAY && (h>0||m>0||s>0));
+    if (past) hi = mid; else lo = mid;
   }
-  return lo;
+  return new Date(Math.round((+lo + +hi)/2/1000)*1000);
 }
-const MIDNIGHT=ZONES.map(z=>({...z,target:tzMidnight(z.tz)}));
-MIDNIGHT.sort((a,b)=>a.target-b.target);
 
-const tzRow=document.getElementById('tz-row');
-const dotsEl=document.getElementById('progress-dots');
-const banner=document.getElementById('arriving-banner');
-const cards=MIDNIGHT.map(z=>{
-  const card=document.createElement('div');
-  card.className='tz-block';
-  card.innerHTML=`<div class="tz-label">${z.label} (${z.abbr})</div><div class="tz-time" id="time-${z.abbr}">--:--:--</div>`;
-  tzRow.appendChild(card);
-  const dot=document.createElement('div');dot.className='pdot';dotsEl.appendChild(dot);
-  return{zone:z,card,dot,el:null};
+const MIDNIGHT_RAW = ZONES.map(z => ({ ...z, target: tzMidnight(z.tz) }));
+MIDNIGHT_RAW.sort((a,b) => a.target - b.target);
+const UNIQUE_MIDNIGHT = MIDNIGHT_RAW.filter((z,i,arr) =>
+  i===0 || z.target.getTime() !== arr[i-1].target.getTime()
+);
+
+// ─ Build UI ─
+const WINDOW = 5;
+const tzRow  = document.getElementById('tz-row');
+const dotsEl = document.getElementById('progress-dots');
+const banner = document.getElementById('arriving-banner');
+const statusLabel = document.getElementById('status-label');
+
+const allCards = UNIQUE_MIDNIGHT.map((z,idx) => {
+  const card = document.createElement('div');
+  card.className = 'tz-block';
+  card.innerHTML = `<div class="tz-label">${z.label}<br><span style="font-size:.5rem">${z.abbr}</span></div>` +
+                   `<div class="tz-time" id="ttime_${idx}">--:--:--</div>`;
+  const dot = document.createElement('div');
+  dot.className = 'pdot';
+  dotsEl.appendChild(dot);
+  return { zone: z, card, dot };
 });
-cards.forEach(c=>{c.el=document.getElementById('time-'+c.zone.abbr);});
 
-// Per-zone test buttons
-const tbWrap=document.getElementById('test-zone-btns');
-MIDNIGHT.forEach((z,i)=>{
-  const b=document.createElement('button');b.className='tz-test-btn';
-  b.textContent=`Test ${z.abbr}`;tbWrap.appendChild(b);
-  b.addEventListener('click',()=>testZone(i));
+// Populate zone selector
+const sel = document.getElementById('tz-select');
+UNIQUE_MIDNIGHT.forEach((z,i) => {
+  const o = document.createElement('option');
+  o.value = i;
+  o.textContent = `${i+1}. ${z.label} (${z.abbr})`;
+  sel.appendChild(o);
 });
 
-const ball=document.getElementById('ball'),msg=document.getElementById('message');
-let droppedCount=0,isDropping=false;
-MIDNIGHT.forEach((z,i)=>{if(Date.now()>z.target.getTime()+30000)droppedCount=i+1;});
-function setBallTop(px,dur,ease){ball.style.transition=dur?`top ${dur}ms ${ease}`:'none';ball.style.top=px+'px';}
+let droppedCount = 0;
+let isDropping   = false;
+
+// Grace: skip zones already 30s past at load
+UNIQUE_MIDNIGHT.forEach((z,i) => {
+  if (Date.now() > z.target.getTime() + 30000) droppedCount = i + 1;
+});
+
+function getTimeEl(i){ return document.getElementById('ttime_'+i); }
+
+function renderWindow(){
+  txRow_inner();
+  statusLabel.textContent = `Zone ${Math.min(droppedCount+1, UNIQUE_MIDNIGHT.length)} / ${UNIQUE_MIDNIGHT.length}`;
+}
+function txRow_inner(){
+  tzRow.innerHTML='';
+  const total=UNIQUE_MIDNIGHT.length;
+  let start=Math.max(0,Math.min(droppedCount-1,total-WINDOW));
+  const end=Math.min(start+WINDOW,total);
+  for(let i=start;i<end;i++){
+    const c=allCards[i];
+    c.card.classList.remove('next-up','dropping','done-tz');
+    if(i<droppedCount)           c.card.classList.add('done-tz');
+    else if(i===droppedCount)    c.card.classList.add('next-up');
+    tzRow.appendChild(c.card);
+  }
+}
+
+function updateDots(){
+  allCards.forEach((c,i)=>{
+    c.dot.classList.remove('done-dot','next-dot');
+    if(i<droppedCount)        c.dot.classList.add('done-dot');
+    else if(i===droppedCount) c.dot.classList.add('next-dot');
+  });
+}
+
+renderWindow();
+updateDots();
+
+// ─ Ball ─
+const ball=document.getElementById('ball');
+const msg =document.getElementById('message');
+
+function setBallTop(px,duration,easing){
+  ball.style.transition=duration?`top ${duration}ms ${easing}`:'none';
+  ball.style.top=px+'px';
+}
 setBallTop(0,0);
 
-function dropForZone(i){
-  if(isDropping)return;
+function dropForZone(i,forceFinal){
+  if(isDropping) return;
   isDropping=true;
-  const isFinal=(i===MIDNIGHT.length-1);
-  const dropTo=isFinal?480:360;
-  cards[i].card.classList.add('dropping');
-  cards[i].dot.classList.add('done-dot');
-  banner.textContent=`🎂 July 16 arrives in ${MIDNIGHT[i].label}!`;
+  const isFinal=forceFinal||(i===UNIQUE_MIDNIGHT.length-1);
+  const z=UNIQUE_MIDNIGHT[i];
+
+  allCards[i].card.classList.remove('next-up');
+  allCards[i].card.classList.add('dropping');
+  allCards[i].dot.classList.add('done-dot');
+
+  banner.textContent=`🎂 July 16 arrives in ${z.label}!`;
   banner.classList.add('show');
-  setBallTop(dropTo,isFinal?2400:1600,'cubic-bezier(.4,0,.2,1)');
+
+  const dropTo=isFinal?480:370;
+  setBallTop(dropTo,isFinal?2400:1700,'cubic-bezier(.4,0,.2,1)');
+
+  setTimeout(()=>{
+    msg.classList.add('show');
+    launchFireworks();
+    startConfetti();
+    startSparkles();
+  }, isFinal?2600:1900);
+
   if(isFinal){
+    setTimeout(()=>{ banner.classList.remove('show'); },4000);
+    // auto-reset after final for test convenience
     setTimeout(()=>{
-      msg.classList.add('show');
-      launchFireworks();startConfetti();startSparkles();
-      banner.classList.remove('show');
-    },2600);
+      msg.classList.remove('show');
+      setBallTop(0,900,'cubic-bezier(.2,0,.6,1)');
+      setTimeout(()=>{
+        allCards[i].card.classList.remove('dropping');
+        isDropping=false;
+        renderWindow();
+        updateDots();
+      },1000);
+    },7000);
   } else {
     setTimeout(()=>{
+      msg.classList.remove('show');
       setBallTop(0,900,'cubic-bezier(.2,0,.6,1)');
       setTimeout(()=>{
         banner.classList.remove('show');
-        cards[i].card.classList.remove('dropping');
-        cards[i].card.classList.add('done-tz');
+        allCards[i].card.classList.remove('dropping');
+        allCards[i].card.classList.add('done-tz');
         droppedCount++;
         isDropping=false;
-        updateCardStyles();
+        renderWindow();
+        updateDots();
       },1000);
-    },2200);
+    },3800);
   }
 }
 
-function testZone(i){
-  // Reset state back to just before zone i
-  isDropping=false;
-  droppedCount=i;
-  ball.style.transition='none';ball.style.top='0px';
-  msg.classList.remove('show');banner.classList.remove('show');
-  cards.forEach((c,j)=>{
-    c.card.classList.remove('next-up','dropping','done-tz');
-    c.dot.classList.remove('done-dot','next-dot');
-    c.el.classList.remove('hit');
-    if(j<i){c.card.classList.add('done-tz');c.dot.classList.add('done-dot');}
-    if(j===i){c.card.classList.add('next-up');c.dot.classList.add('next-dot');}
-  });
-  setTimeout(()=>dropForZone(i),120);
-}
-
-function updateCardStyles(){
-  cards.forEach((c,i)=>{
-    c.card.classList.remove('next-up','dropping','done-tz');
-    c.dot.classList.remove('done-dot','next-dot');
-    if(i<droppedCount){c.card.classList.add('done-tz');c.dot.classList.add('done-dot');}
-    else if(i===droppedCount){c.card.classList.add('next-up');c.dot.classList.add('next-dot');}
-  });
-}
-updateCardStyles();
-
-function secsUntil(t){return Math.max(0,Math.floor((+t-Date.now())/1000));}
+// ─ Tick ─
 function fmtSecs(s){
-  if(s<=0)return'NOW! 🎂';
+  if(s<=0)return 'NOW! 🎂';
   const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;
   return h>0?`${pad(h)}:${pad(m)}:${pad(sc)}`:`${pad(m)}:${pad(sc)}`;
 }
 function pad(n){return String(n).padStart(2,'0');}
 
 function tick(){
-  cards.forEach((c,i)=>{
-    const s=secsUntil(c.zone.target);
-    c.el.textContent=fmtSecs(s);
-    if(s===0)c.el.classList.add('hit');
-    if(s<=1&&i===droppedCount&&!isDropping)dropForZone(i);
+  const now=Date.now();
+  UNIQUE_MIDNIGHT.forEach((z,i)=>{
+    const s=Math.max(0,Math.floor((z.target-now)/1000));
+    const el=getTimeEl(i);
+    if(el){el.textContent=fmtSecs(s);if(s===0)el.classList.add('hit');}
+    if(s<=1&&i===droppedCount&&!isDropping) dropForZone(i);
   });
 }
-setInterval(tick,1000);tick();
+setInterval(tick,1000);
+tick();
 
-document.getElementById('test-btn').addEventListener('click',()=>testZone(MIDNIGHT.length-1));
+// ═══════════════════════════════════════════════════════════════
+// TEST BUTTON WIRING
+// ═══════════════════════════════════════════════════════════════
 
-// Fireworks
+// Full Celebration — simulates final zone drop
+document.getElementById('btn-celebrate').addEventListener('click',()=>{
+  if(isDropping)return;
+  const i=droppedCount<UNIQUE_MIDNIGHT.length?droppedCount:UNIQUE_MIDNIGHT.length-1;
+  dropForZone(i,true);
+});
+
+// Step Next Zone — advance droppedCount to next zone and trigger drop
+document.getElementById('btn-step').addEventListener('click',()=>{
+  if(isDropping)return;
+  if(droppedCount>=UNIQUE_MIDNIGHT.length) return;
+  dropForZone(droppedCount);
+});
+
+// Simulate specific zone from dropdown
+document.getElementById('btn-sim-zone').addEventListener('click',()=>{
+  if(isDropping)return;
+  const idx=parseInt(sel.value,10);
+  // reset all cards after target zone to undone for clean sim
+  for(let i=idx;i<UNIQUE_MIDNIGHT.length;i++){
+    allCards[i].card.classList.remove('done-tz','next-up','dropping');
+    allCards[i].dot.classList.remove('done-dot','next-dot');
+    const el=getTimeEl(i);
+    if(el)el.classList.remove('hit');
+  }
+  droppedCount=idx;
+  msg.classList.remove('show');
+  ball.style.transition='none';ball.style.top='0px';
+  banner.classList.remove('show');
+  renderWindow();
+  updateDots();
+  setTimeout(()=>dropForZone(idx),120);
+});
+
+// Reset All
+document.getElementById('btn-reset').addEventListener('click',()=>{
+  isDropping=false;
+  droppedCount=0;
+  msg.classList.remove('show');
+  ball.style.transition='none';ball.style.top='0px';
+  banner.classList.remove('show');
+  allCards.forEach((c,i)=>{
+    c.card.classList.remove('done-tz','next-up','dropping');
+    c.dot.classList.remove('done-dot','next-dot');
+    const el=getTimeEl(i);
+    if(el){el.textContent='--:--:--';el.classList.remove('hit');}
+  });
+  renderWindow();
+  updateDots();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// FIREWORKS
+// ═══════════════════════════════════════════════════════════════
 const fwC=document.getElementById('fireworks-canvas'),fwCtx=fwC.getContext('2d');
 let fireworksActive=false,fireworks=[],fwParticles=[];
 const FW=['#f472b6','#fb7185','#60a5fa','#93c5fd','#e879f9','#f9a8d4','#bfdbfe','#fff'];
-function launchFireworks(){fireworksActive=true;setTimeout(()=>{fireworksActive=false;},10000);requestAnimationFrame(drawFW);}
+function launchFireworks(){
+  fireworksActive=true;setTimeout(()=>{fireworksActive=false;},8000);
+  requestAnimationFrame(drawFW);
+}
 function drawFW(){
   fwCtx.clearRect(0,0,900,600);
-  fwCtx.fillStyle='rgba(0,0,0,0.12)';fwCtx.fillRect(0,0,900,600);
-  if(fireworksActive&&Math.random()<.07)fireworks.push({x:100+Math.random()*700,y:520,tx:100+Math.random()*700,ty:40+Math.random()*300,color:FW[Math.floor(Math.random()*FW.length)],speed:8+Math.random()*5});
+  if(fireworksActive&&Math.random()<.07)
+    fireworks.push({x:100+Math.random()*700,y:520,tx:100+Math.random()*700,ty:40+Math.random()*320,
+      color:FW[Math.floor(Math.random()*FW.length)],speed:8+Math.random()*5});
   fireworks=fireworks.filter(f=>{
     const dx=f.tx-f.x,dy=f.ty-f.y,d=Math.hypot(dx,dy);
-    if(d<f.speed){for(let i=0;i<70;i++){const a=(Math.PI*2/70)*i,sp=1.8+Math.random()*5;fwParticles.push({x:f.x,y:f.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,color:f.color,life:1});}return false;}
-    f.x+=dx/d*f.speed;f.y+=dy/d*f.speed;fwCtx.beginPath();fwCtx.arc(f.x,f.y,3,0,Math.PI*2);fwCtx.fillStyle=f.color;fwCtx.fill();return true;
+    if(d<f.speed){
+      for(let i=0;i<70;i++){const a=(Math.PI*2/70)*i,sp=1.8+Math.random()*5;
+        fwParticles.push({x:f.x,y:f.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,color:f.color,life:1});}
+      return false;
+    }
+    f.x+=dx/d*f.speed;f.y+=dy/d*f.speed;
+    fwCtx.beginPath();fwCtx.arc(f.x,f.y,3,0,Math.PI*2);fwCtx.fillStyle=f.color;fwCtx.fill();return true;
   });
   fwParticles=fwParticles.filter(p=>{
     p.x+=p.vx;p.y+=p.vy+.07;p.vx*=.97;p.vy*=.97;p.life-=.016;
-    fwCtx.globalAlpha=p.life;fwCtx.beginPath();fwCtx.arc(p.x,p.y,2.5,0,Math.PI*2);fwCtx.fillStyle=p.color;fwCtx.fill();fwCtx.globalAlpha=1;return p.life>0;
+    fwCtx.globalAlpha=p.life;fwCtx.beginPath();fwCtx.arc(p.x,p.y,2.5,0,Math.PI*2);
+    fwCtx.fillStyle=p.color;fwCtx.fill();fwCtx.globalAlpha=1;return p.life>0;
   });
   if(fireworks.length||fwParticles.length||fireworksActive)requestAnimationFrame(drawFW);
   else fwCtx.clearRect(0,0,900,600);
 }
-// Confetti
+
+// CONFETTI
 const cfC=document.getElementById('confetti-canvas'),cfCtx=cfC.getContext('2d');
 let confettiActive=false,cfPieces=[];
 const CF=['#f472b6','#fb7185','#60a5fa','#93c5fd','#e879f9','#fbbf24','#fff','#f9a8d4'];
-function startConfetti(){confettiActive=true;setTimeout(()=>{confettiActive=false;},10000);requestAnimationFrame(drawCF);}
+function startConfetti(){
+  confettiActive=true;setTimeout(()=>{confettiActive=false;},8000);
+  requestAnimationFrame(drawCF);
+}
 function drawCF(){
   cfCtx.clearRect(0,0,900,600);
-  if(confettiActive&&Math.random()<.4)for(let i=0;i<4;i++)cfPieces.push({x:Math.random()*900,y:-12,w:5+Math.random()*9,h:9+Math.random()*7,color:CF[Math.floor(Math.random()*CF.length)],vx:(Math.random()-.5)*3.5,vy:2+Math.random()*3.5,rot:Math.random()*Math.PI*2,rotV:(Math.random()-.5)*.18});
-  cfPieces=cfPieces.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=p.rotV;cfCtx.save();cfCtx.translate(p.x,p.y);cfCtx.rotate(p.rot);cfCtx.fillStyle=p.color;cfCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cfCtx.restore();return p.y<620;});
+  if(confettiActive&&Math.random()<.4)for(let i=0;i<4;i++)
+    cfPieces.push({x:Math.random()*900,y:-12,w:5+Math.random()*9,h:9+Math.random()*7,
+      color:CF[Math.floor(Math.random()*CF.length)],
+      vx:(Math.random()-.5)*3.5,vy:2+Math.random()*3.5,
+      rot:Math.random()*Math.PI*2,rotV:(Math.random()-.5)*.18});
+  cfPieces=cfPieces.filter(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.rot+=p.rotV;
+    cfCtx.save();cfCtx.translate(p.x,p.y);cfCtx.rotate(p.rot);
+    cfCtx.fillStyle=p.color;cfCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    cfCtx.restore();return p.y<620;
+  });
   if(cfPieces.length||confettiActive)requestAnimationFrame(drawCF);
 }
-// Sparkles
+
+// SPARKLES
 const spC=document.getElementById('sparkle-canvas'),spCtx=spC.getContext('2d');
 let sparklesActive=false,sparkles=[];
-function startSparkles(){sparklesActive=true;setTimeout(()=>{sparklesActive=false;},11000);requestAnimationFrame(drawSP);}
+function startSparkles(){
+  sparklesActive=true;setTimeout(()=>{sparklesActive=false;},9000);
+  requestAnimationFrame(drawSP);
+}
 function drawSP(){
   spCtx.clearRect(0,0,900,600);
-  if(sparklesActive&&Math.random()<.45){const hue=Math.random()<.5?330+Math.random()*30:200+Math.random()*30;sparkles.push({x:Math.random()*900,y:Math.random()*600,r:1+Math.random()*3.5,life:1,color:`hsl(${hue},100%,78%)`});}
+  if(sparklesActive&&Math.random()<.45){
+    const hue=Math.random()<.5?330+Math.random()*30:200+Math.random()*30;
+    sparkles.push({x:Math.random()*900,y:Math.random()*600,r:1+Math.random()*3.5,life:1,color:`hsl(${hue},100%,78%)`});
+  }
   sparkles=sparkles.filter(s=>{
     s.life-=.028;spCtx.globalAlpha=s.life;
     const r=s.r,x=s.x,y=s.y;spCtx.beginPath();
-    spCtx.moveTo(x,y-r*3);spCtx.lineTo(x+r*.7,y-r*.7);spCtx.lineTo(x+r*3,y);spCtx.lineTo(x+r*.7,y+r*.7);
-    spCtx.lineTo(x,y+r*3);spCtx.lineTo(x-r*.7,y+r*.7);spCtx.lineTo(x-r*3,y);spCtx.lineTo(x-r*.7,y-r*.7);
-    spCtx.closePath();spCtx.fillStyle=s.color;spCtx.fill();spCtx.globalAlpha=1;return s.life>0;
+    spCtx.moveTo(x,y-r*3);spCtx.lineTo(x+r*.7,y-r*.7);
+    spCtx.lineTo(x+r*3,y);spCtx.lineTo(x+r*.7,y+r*.7);
+    spCtx.lineTo(x,y+r*3);spCtx.lineTo(x-r*.7,y+r*.7);
+    spCtx.lineTo(x-r*3,y);spCtx.lineTo(x-r*.7,y-r*.7);
+    spCtx.closePath();spCtx.fillStyle=s.color;spCtx.fill();
+    spCtx.globalAlpha=1;return s.life>0;
   });
   if(sparkles.length||sparklesActive)requestAnimationFrame(drawSP);
 }

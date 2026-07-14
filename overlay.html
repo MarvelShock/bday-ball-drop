@@ -8,64 +8,49 @@
     *{margin:0;padding:0;box-sizing:border-box;}
     html,body{width:900px;height:600px;overflow:hidden;background:transparent;font-family:'Quicksand',sans-serif;}
     #scene{position:relative;width:900px;height:600px;overflow:hidden;}
-    #bg-glow{
-      position:absolute;inset:0;
-      background:
-        radial-gradient(ellipse 600px 300px at 50% 110%,rgba(244,114,182,.18) 0%,transparent 70%),
-        radial-gradient(ellipse 400px 200px at 20% 0%, rgba(96,165,250,.12)   0%,transparent 70%),
-        radial-gradient(ellipse 400px 200px at 80% 0%, rgba(244,114,182,.10)  0%,transparent 70%);
-      pointer-events:none;z-index:1;
-    }
 
-    /* ── Countdown display ── */
+    /* ── Zone card row ── */
     #countdown-wrap{
-      position:absolute;top:18px;left:50%;
+      position:absolute;top:10px;left:50%;
       transform:translateX(-50%);
-      z-index:20;width:780px;height:96px;perspective:800px;
+      z-index:20;width:890px;
     }
-    /* All 4 zone cards always rendered, visibility driven by classes */
     #tz-row{
-      position:absolute;inset:0;
-      display:flex;align-items:center;justify-content:center;gap:10px;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      flex-wrap:nowrap;
     }
     .tz-block{
-      background:rgba(10,0,30,.65);
+      background:rgba(10,0,30,.70);
       border:1px solid rgba(244,114,182,.3);
-      border-radius:14px;padding:9px 14px;
-      text-align:center;min-width:164px;
+      border-radius:12px;padding:7px 11px;
+      text-align:center;min-width:120px;max-width:145px;
       backdrop-filter:blur(6px);
-      box-shadow:0 0 12px rgba(244,114,182,.1),inset 0 1px 0 rgba(255,255,255,.06);
       transition:border-color .4s,box-shadow .4s,opacity .4s,transform .4s;
+      flex-shrink:0;
     }
-    /* Next-up zone: blue accent */
     .tz-block.next-up{
-      border-color:rgba(96,165,250,.8);
-      box-shadow:0 0 22px rgba(96,165,250,.35),inset 0 1px 0 rgba(255,255,255,.09);
-      transform:scale(1.05);
+      border-color:rgba(96,165,250,.85);
+      box-shadow:0 0 18px rgba(96,165,250,.4);
+      transform:scale(1.07);
     }
-    /* Currently dropping: bright pink */
     .tz-block.dropping{
       border-color:rgba(244,114,182,.95);
-      box-shadow:0 0 28px rgba(244,114,182,.55),inset 0 1px 0 rgba(255,255,255,.1);
-      transform:scale(1.08);
+      box-shadow:0 0 26px rgba(244,114,182,.6);
+      transform:scale(1.10);
     }
-    /* Already done: dim */
-    .tz-block.done-tz{
-      opacity:.38;
-      transform:scale(.96);
-    }
-    .tz-label{font-size:.6rem;color:#f9a8d4;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+    .tz-block.done-tz{opacity:.32;transform:scale(.95);}
+    .tz-label{font-size:.55rem;color:#f9a8d4;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:2px;line-height:1.2;}
     .tz-block.next-up .tz-label{color:#93c5fd;}
     .tz-block.dropping .tz-label{color:#fff;}
-    .tz-time{font-size:1.45rem;font-weight:700;color:#fff;letter-spacing:2px;font-variant-numeric:tabular-nums;}
+    .tz-time{font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:1.5px;font-variant-numeric:tabular-nums;}
     .tz-time.hit{color:#f472b6;}
 
-    /* ── "Now arriving" banner ── */
+    /* ── Arriving banner ── */
     #arriving-banner{
-      position:absolute;top:118px;left:50%;
+      position:absolute;top:110px;left:50%;
       transform:translateX(-50%);
       z-index:22;
-      font-size:.85rem;font-weight:700;
+      font-size:.82rem;font-weight:700;
       color:#f9a8d4;letter-spacing:1px;text-transform:uppercase;
       opacity:0;transition:opacity .5s;
       white-space:nowrap;
@@ -75,12 +60,13 @@
 
     /* ── Progress dots ── */
     #progress-dots{
-      position:absolute;top:126px;left:50%;
+      position:absolute;top:118px;left:50%;
       transform:translateX(-50%);
-      display:flex;gap:8px;z-index:22;
+      display:flex;gap:6px;z-index:22;
+      flex-wrap:wrap;justify-content:center;max-width:860px;
     }
-    .pdot{width:10px;height:10px;border-radius:50%;background:rgba(244,114,182,.25);transition:background .4s,box-shadow .4s;}
-    .pdot.done-dot{background:#f472b6;box-shadow:0 0 8px #f472b6;}
+    .pdot{width:9px;height:9px;border-radius:50%;background:rgba(244,114,182,.22);transition:background .4s,box-shadow .4s;}
+    .pdot.done-dot{background:#f472b6;box-shadow:0 0 7px #f472b6;}
     .pdot.next-dot{background:#93c5fd;box-shadow:0 0 6px #93c5fd;}
 
     /* ── Pole ── */
@@ -102,9 +88,9 @@
     }
     /* ── Message ── */
     #message{
-      position:absolute;bottom:54px;left:50%;
+      position:absolute;bottom:50px;left:50%;
       transform:translateX(-50%);
-      font-size:2.75rem;font-weight:700;
+      font-size:2.6rem;font-weight:700;
       background:linear-gradient(135deg,#f472b6,#60a5fa,#f9a8d4,#93c5fd);
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       text-align:center;white-space:nowrap;
@@ -114,12 +100,10 @@
     #message.show{opacity:1;}
     canvas{position:absolute;top:0;left:0;width:900px;height:600px;pointer-events:none;}
     #fireworks-canvas{z-index:10;}#confetti-canvas{z-index:11;}#sparkle-canvas{z-index:12;}
-    #test-btn{display:none;}
   </style>
 </head>
 <body>
 <div id="scene">
-  <div id="bg-glow"></div>
   <canvas id="fireworks-canvas" width="900" height="600"></canvas>
   <canvas id="confetti-canvas"  width="900" height="600"></canvas>
   <canvas id="sparkle-canvas"   width="900" height="600"></canvas>
@@ -133,92 +117,151 @@
   <div id="pole"></div>
   <div id="ball"></div>
   <div id="message">🎉 Happy Birthday Nicole! 🎂</div>
-  <button id="test-btn">Test Celebration</button>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// CONFIG
+// WORLDWIDE TIMEZONE SEQUENCE — IANA-based, ordered earliest→latest
+// Each zone is when July 16 midnight first arrives in that region.
 // ═══════════════════════════════════════════════════════════════
 const BDAY_MONTH = 7;
 const BDAY_DAY   = 16;
 
-// Timezones in order they hit midnight — earliest first
 const ZONES = [
-  { label:'Eastern',  abbr:'ET', tz:'America/New_York'    },
-  { label:'Central',  abbr:'CT', tz:'America/Chicago'     },
-  { label:'Mountain', abbr:'MT', tz:'America/Denver'      },
-  { label:'Pacific',  abbr:'PT', tz:'America/Los_Angeles' },
+  { label:'Kiritimati',    abbr:'LINT',  tz:'Pacific/Kiritimati'     }, // UTC+14
+  { label:'Samoa',         abbr:'WST',   tz:'Pacific/Apia'           }, // UTC+13
+  { label:'Tonga',         abbr:'TOT',   tz:'Pacific/Tongatapu'      }, // UTC+13
+  { label:'Auckland',      abbr:'NZST',  tz:'Pacific/Auckland'       }, // UTC+12
+  { label:'Fiji',          abbr:'FJT',   tz:'Pacific/Fiji'           }, // UTC+12
+  { label:'Sydney',        abbr:'AEST',  tz:'Australia/Sydney'       }, // UTC+10/11
+  { label:'Tokyo',         abbr:'JST',   tz:'Asia/Tokyo'             }, // UTC+9
+  { label:'Beijing',       abbr:'CST',   tz:'Asia/Shanghai'          }, // UTC+8
+  { label:'Bangkok',       abbr:'ICT',   tz:'Asia/Bangkok'           }, // UTC+7
+  { label:'Dhaka',         abbr:'BST',   tz:'Asia/Dhaka'             }, // UTC+6
+  { label:'Karachi',       abbr:'PKT',   tz:'Asia/Karachi'           }, // UTC+5
+  { label:'Dubai',         abbr:'GST',   tz:'Asia/Dubai'             }, // UTC+4
+  { label:'Moscow',        abbr:'MSK',   tz:'Europe/Moscow'          }, // UTC+3
+  { label:'Nairobi',       abbr:'EAT',   tz:'Africa/Nairobi'         }, // UTC+3
+  { label:'Istanbul',      abbr:'TRT',   tz:'Europe/Istanbul'        }, // UTC+3
+  { label:'Cairo',         abbr:'EET',   tz:'Africa/Cairo'           }, // UTC+2
+  { label:'Paris',         abbr:'CEST',  tz:'Europe/Paris'           }, // UTC+1/2
+  { label:'Lagos',         abbr:'WAT',   tz:'Africa/Lagos'           }, // UTC+1
+  { label:'London',        abbr:'BST',   tz:'Europe/London'          }, // UTC+0/1
+  { label:'Reykjavik',     abbr:'GMT',   tz:'Atlantic/Reykjavik'     }, // UTC+0
+  { label:'Azores',        abbr:'AZOT',  tz:'Atlantic/Azores'        }, // UTC-1
+  { label:'Praia',         abbr:'CVT',   tz:'Atlantic/Cape_Verde'    }, // UTC-1 (no DST)
+  { label:'São Paulo',     abbr:'BRT',   tz:'America/Sao_Paulo'      }, // UTC-3
+  { label:'Buenos Aires',  abbr:'ART',   tz:'America/Argentina/Buenos_Aires' }, // UTC-3
+  { label:'Halifax',       abbr:'ADT',   tz:'America/Halifax'        }, // UTC-3/4
+  { label:'New York',      abbr:'EDT',   tz:'America/New_York'       }, // UTC-4/5
+  { label:'Chicago',       abbr:'CDT',   tz:'America/Chicago'        }, // UTC-5/6
+  { label:'Denver',        abbr:'MDT',   tz:'America/Denver'         }, // UTC-6/7
+  { label:'Phoenix',       abbr:'MST',   tz:'America/Phoenix'        }, // UTC-7 (no DST)
+  { label:'Los Angeles',   abbr:'PDT',   tz:'America/Los_Angeles'    }, // UTC-7/8
+  { label:'Anchorage',     abbr:'AKDT',  tz:'America/Anchorage'      }, // UTC-8/9
+  { label:'Honolulu',      abbr:'HST',   tz:'Pacific/Honolulu'       }, // UTC-10
+  { label:'Pago Pago',     abbr:'SST',   tz:'Pacific/Pago_Pago'      }, // UTC-11
+  { label:'Baker Is.',     abbr:'AoE',   tz:'Pacific/Fakaofo'        }, // closest to AoE UTC-12, Fakaofo is UTC-11; use Baker/Howland concept via Etc/GMT+12
 ];
 
+// Deduplicate: remove Fakaofo entry and replace last with Etc/GMT+12
+ZONES[ZONES.length-1] = { label:'Baker Is.', abbr:'AoE', tz:'Etc/GMT+12' };
+
 // ═══════════════════════════════════════════════════════════════
-// COMPUTE EACH TIMEZONE'S MIDNIGHT JULY 16
+// COMPUTE EACH ZONE'S MIDNIGHT JULY 16 (UTC instant)
 // ═══════════════════════════════════════════════════════════════
 function tzMidnight(tz) {
-  // Binary-search for the UTC instant that equals midnight July 16 in `tz`
+  const year = new Date().getFullYear();
   const fmt = new Intl.DateTimeFormat('en-US', {
     timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
     hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false
   });
-  // Bracket: July 16 local midnight must be somewhere in a ±14h window around
-  // a naive UTC midnight for that date.
-  let lo = new Date(Date.UTC(new Date().getFullYear(), BDAY_MONTH-1, BDAY_DAY) - 14*3600e3);
-  let hi = new Date(+lo + 28*3600e3);
-  for (let i = 0; i < 48; i++) {
+  let lo = new Date(Date.UTC(year, BDAY_MONTH-1, BDAY_DAY) - 15*3600e3);
+  let hi = new Date(+lo + 30*3600e3);
+  for (let i = 0; i < 52; i++) {
     const mid = new Date((+lo + +hi) / 2);
     const p = {};
     fmt.formatToParts(mid).forEach(x => p[x.type] = x.value);
     const mo=+p.month, d=+p.day, h=+p.hour, m=+p.minute, s=+p.second;
-    const hit = mo===BDAY_MONTH && d===BDAY_DAY && h===0 && m===0 && s===0;
-    if (hit) return mid;
-    const past = mo>BDAY_MONTH || (mo===BDAY_MONTH && d>BDAY_DAY) ||
+    const past = mo > BDAY_MONTH || (mo===BDAY_MONTH && d>BDAY_DAY) ||
                  (mo===BDAY_MONTH && d===BDAY_DAY && (h>0||m>0||s>0));
     if (past) hi = mid; else lo = mid;
   }
-  return lo;
+  return new Date(Math.round((+lo + +hi)/2/1000)*1000);
 }
 
 const MIDNIGHT = ZONES.map(z => ({ ...z, target: tzMidnight(z.tz) }));
-// Sort ascending by UTC time (should already be ordered ET→CT→MT→PT)
 MIDNIGHT.sort((a,b) => a.target - b.target);
 
-// ═══════════════════════════════════════════════════════════════
-// BUILD UI
-// ═══════════════════════════════════════════════════════════════
-const tzRow   = document.getElementById('tz-row');
-const dots    = document.getElementById('progress-dots');
-const banner  = document.getElementById('arriving-banner');
+// ── Remove exact duplicates (same UTC millisecond) ──
+const UNIQUE_MIDNIGHT = MIDNIGHT.filter((z,i,arr) =>
+  i===0 || z.target.getTime() !== arr[i-1].target.getTime()
+);
 
-const cards = MIDNIGHT.map(z => {
+// ═══════════════════════════════════════════════════════════════
+// SLIDING WINDOW: show 5 cards at a time centered on current zone
+// ═══════════════════════════════════════════════════════════════
+const WINDOW = 5; // number of cards visible at once
+const tzRow  = document.getElementById('tz-row');
+const dotsEl = document.getElementById('progress-dots');
+const banner = document.getElementById('arriving-banner');
+
+// Build card DOM for all zones (will slide visibility)
+const allCards = UNIQUE_MIDNIGHT.map(z => {
   const card = document.createElement('div');
   card.className = 'tz-block';
-  card.innerHTML = `<div class="tz-label">${z.label} (${z.abbr})</div>` +
-                   `<div class="tz-time" id="time-${z.abbr}">--:--:--</div>`;
-  tzRow.appendChild(card);
+  card.innerHTML = `<div class="tz-label">${z.label}<br><span style="font-size:.5rem">${z.abbr}</span></div>` +
+                   `<div class="tz-time" id="ttime-${z.abbr.replace(/[^a-zA-Z0-9]/g,'')}_${UNIQUE_MIDNIGHT.indexOf(z)}">--:--:--</div>`;
   const dot = document.createElement('div');
   dot.className = 'pdot';
-  dots.appendChild(dot);
-  return { zone: z, card, dot, el: null };
+  dotsEl.appendChild(dot);
+  return { zone: z, card, dot };
 });
-cards.forEach(c => { c.el = document.getElementById('time-'+c.zone.abbr); });
+
+let droppedCount = 0;
+let isDropping   = false;
+
+// Determine how many zones already passed before page load
+UNIQUE_MIDNIGHT.forEach((z,i) => {
+  if (Date.now() > z.target.getTime() + 30000) droppedCount = i + 1;
+});
+
+function getTimeEl(i) {
+  const z = UNIQUE_MIDNIGHT[i];
+  return allCards[i].card.querySelector('.tz-time');
+}
+
+function renderWindow() {
+  tzRow.innerHTML = '';
+  const total = UNIQUE_MIDNIGHT.length;
+  // Center window on droppedCount (next zone to drop)
+  let start = Math.max(0, Math.min(droppedCount - 1, total - WINDOW));
+  const end = Math.min(start + WINDOW, total);
+  for (let i = start; i < end; i++) {
+    const c = allCards[i];
+    c.card.classList.remove('next-up','dropping','done-tz');
+    if (i < droppedCount)           c.card.classList.add('done-tz');
+    else if (i === droppedCount)    c.card.classList.add('next-up');
+    tzRow.appendChild(c.card);
+  }
+}
+
+function updateDots() {
+  allCards.forEach((c,i) => {
+    c.dot.classList.remove('done-dot','next-dot');
+    if (i < droppedCount)        c.dot.classList.add('done-dot');
+    else if (i === droppedCount) c.dot.classList.add('next-dot');
+  });
+}
+
+renderWindow();
+updateDots();
 
 // ═══════════════════════════════════════════════════════════════
-// BALL + STATE
+// BALL
 // ═══════════════════════════════════════════════════════════════
 const ball = document.getElementById('ball');
 const msg  = document.getElementById('message');
-
-// droppedCount: how many zones have already fired
-let droppedCount = 0;
-let isDropping   = false;   // ball currently mid-animation
-
-// Determine on load: how many zones have ALREADY passed midnight?
-MIDNIGHT.forEach((z,i) => {
-  if (Date.now() > z.target.getTime() + 30000) {
-    // 30s grace — if we loaded right at midnight, still play
-    droppedCount = i + 1;
-  }
-});
 
 function setBallTop(px, duration, easing) {
   ball.style.transition = duration ? `top ${duration}ms ${easing}` : 'none';
@@ -226,114 +269,74 @@ function setBallTop(px, duration, easing) {
 }
 setBallTop(0, 0);
 
-// ── Ball drop for zone index i ──
 function dropForZone(i) {
   if (isDropping) return;
   isDropping = true;
-  const isFinal = (i === MIDNIGHT.length - 1);
-  const dropTo  = isFinal ? 480 : 360;
-  const label   = MIDNIGHT[i].label;
+  const isFinal = (i === UNIQUE_MIDNIGHT.length - 1);
+  const z = UNIQUE_MIDNIGHT[i];
 
-  // Mark card as dropping
-  cards[i].card.classList.add('dropping');
-  cards[i].dot.classList.add('done-dot');
+  // Mark dropping card
+  allCards[i].card.classList.remove('next-up');
+  allCards[i].card.classList.add('dropping');
+  allCards[i].dot.classList.add('done-dot');
 
-  // Show arriving banner
-  banner.textContent = `🎂 July 16 arrives in ${label}!`;
+  banner.textContent = `🎂 July 16 arrives in ${z.label}!`;
   banner.classList.add('show');
 
-  // Drop
-  setBallTop(dropTo, isFinal ? 2400 : 1600, 'cubic-bezier(.4,0,.2,1)');
+  const dropTo = isFinal ? 480 : 370;
+  setBallTop(dropTo, isFinal ? 2400 : 1700, 'cubic-bezier(.4,0,.2,1)');
+
+  // Trigger celebration
+  setTimeout(() => {
+    msg.classList.add('show');
+    launchFireworks();
+    startConfetti();
+    startSparkles();
+  }, isFinal ? 2600 : 1900);
 
   if (isFinal) {
-    // Final drop → full celebration, no reset
-    setTimeout(() => {
-      msg.classList.add('show');
-      launchFireworks();
-      startConfetti();
-      startSparkles();
-      banner.classList.remove('show');
-    }, 2600);
+    setTimeout(() => { banner.classList.remove('show'); }, 4000);
   } else {
-    // Non-final drop → reset ball after pause, advance droppedCount
     setTimeout(() => {
-      setBallTop(0, 900, 'cubic-bezier(.2,0,.6,1)');  // rise back up
+      msg.classList.remove('show');
+      setBallTop(0, 900, 'cubic-bezier(.2,0,.6,1)');
       setTimeout(() => {
         banner.classList.remove('show');
-        cards[i].card.classList.remove('dropping');
-        cards[i].card.classList.add('done-tz');
+        allCards[i].card.classList.remove('dropping');
+        allCards[i].card.classList.add('done-tz');
         droppedCount++;
         isDropping = false;
-        updateCardStyles();
+        renderWindow();
+        updateDots();
       }, 1000);
-    }, 2200);
+    }, 3800);
   }
 }
 
-// ── Update card highlight states ──
-function updateCardStyles() {
-  cards.forEach((c, i) => {
-    c.card.classList.remove('next-up','dropping','done-tz');
-    c.dot.classList.remove('done-dot','next-dot');
-    if (i < droppedCount) {
-      c.card.classList.add('done-tz');
-      c.dot.classList.add('done-dot');
-    } else if (i === droppedCount) {
-      c.card.classList.add('next-up');
-      c.dot.classList.add('next-dot');
-    }
-  });
-}
-updateCardStyles();
-
 // ═══════════════════════════════════════════════════════════════
-// COUNTDOWN TICK
+// TICK
 // ═══════════════════════════════════════════════════════════════
-function secsUntil(t) { return Math.max(0, Math.floor((+t - Date.now()) / 1000)); }
 function fmtSecs(s) {
   if (s <= 0) return 'NOW! 🎂';
-  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sc = s%60;
-  return h > 0
-    ? `${pad(h)}:${pad(m)}:${pad(sc)}`
-    : `${pad(m)}:${pad(sc)}`;
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;
+  return h>0?`${pad(h)}:${pad(m)}:${pad(sc)}`:`${pad(m)}:${pad(sc)}`;
 }
-function pad(n) { return String(n).padStart(2,'0'); }
+function pad(n){return String(n).padStart(2,'0');}
 
 function tick() {
   const now = Date.now();
-  cards.forEach((c, i) => {
-    const s = secsUntil(c.zone.target);
-    c.el.textContent = fmtSecs(s);
-    if (s === 0) c.el.classList.add('hit');
-
-    // Trigger drop when this zone just hit midnight and hasn't been dropped yet
-    if (s <= 1 && i === droppedCount && !isDropping) {
-      dropForZone(i);
+  UNIQUE_MIDNIGHT.forEach((z,i) => {
+    const s = Math.max(0, Math.floor((z.target - now)/1000));
+    const el = getTimeEl(i);
+    if (el) {
+      el.textContent = fmtSecs(s);
+      if (s===0) el.classList.add('hit');
     }
+    if (s<=1 && i===droppedCount && !isDropping) dropForZone(i);
   });
 }
 setInterval(tick, 1000);
 tick();
-
-// ═══════════════════════════════════════════════════════════════
-// TEST BUTTON (hidden in overlay.html)
-// ═══════════════════════════════════════════════════════════════
-document.getElementById('test-btn').addEventListener('click', () => {
-  // Reset all state and simulate final drop
-  droppedCount = MIDNIGHT.length - 1;
-  isDropping = false;
-  ball.style.transition = 'none'; ball.style.top = '0px';
-  msg.classList.remove('show');
-  banner.classList.remove('show');
-  cards.forEach((c,i) => {
-    c.card.classList.remove('next-up','dropping','done-tz');
-    c.dot.classList.remove('done-dot','next-dot');
-    if (i < droppedCount) { c.card.classList.add('done-tz'); c.dot.classList.add('done-dot'); }
-    if (i === droppedCount) { c.card.classList.add('next-up'); c.dot.classList.add('next-dot'); }
-    c.el.classList.remove('hit');
-  });
-  setTimeout(() => dropForZone(MIDNIGHT.length - 1), 100);
-});
 
 // ═══════════════════════════════════════════════════════════════
 // FIREWORKS
@@ -343,16 +346,14 @@ let fireworksActive=false,fireworks=[],fwParticles=[];
 const FW=['#f472b6','#fb7185','#60a5fa','#93c5fd','#e879f9','#f9a8d4','#bfdbfe','#fff'];
 function launchFireworks(){
   fireworksActive=true;
-  setTimeout(()=>{fireworksActive=false;},10000);
+  setTimeout(()=>{fireworksActive=false;},8000);
   requestAnimationFrame(drawFW);
 }
 function drawFW(){
   fwCtx.clearRect(0,0,900,600);
-  fwCtx.fillStyle='rgba(0,0,0,0.12)';fwCtx.fillRect(0,0,900,600);
-  if(fireworksActive&&Math.random()<0.07){
-    fireworks.push({x:100+Math.random()*700,y:520,tx:100+Math.random()*700,ty:40+Math.random()*300,
+  if(fireworksActive&&Math.random()<.07)
+    fireworks.push({x:100+Math.random()*700,y:520,tx:100+Math.random()*700,ty:40+Math.random()*320,
       color:FW[Math.floor(Math.random()*FW.length)],speed:8+Math.random()*5});
-  }
   fireworks=fireworks.filter(f=>{
     const dx=f.tx-f.x,dy=f.ty-f.y,d=Math.hypot(dx,dy);
     if(d<f.speed){
@@ -379,7 +380,7 @@ const cfC=document.getElementById('confetti-canvas'),cfCtx=cfC.getContext('2d');
 let confettiActive=false,cfPieces=[];
 const CF=['#f472b6','#fb7185','#60a5fa','#93c5fd','#e879f9','#fbbf24','#fff','#f9a8d4'];
 function startConfetti(){
-  confettiActive=true;setTimeout(()=>{confettiActive=false;},10000);
+  confettiActive=true;setTimeout(()=>{confettiActive=false;},8000);
   requestAnimationFrame(drawCF);
 }
 function drawCF(){
@@ -404,7 +405,7 @@ function drawCF(){
 const spC=document.getElementById('sparkle-canvas'),spCtx=spC.getContext('2d');
 let sparklesActive=false,sparkles=[];
 function startSparkles(){
-  sparklesActive=true;setTimeout(()=>{sparklesActive=false;},11000);
+  sparklesActive=true;setTimeout(()=>{sparklesActive=false;},9000);
   requestAnimationFrame(drawSP);
 }
 function drawSP(){
