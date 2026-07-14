@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Ball Drop – Hub</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d0d1a;
+      color: #f0e6ff;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 2.4rem;
+      background: linear-gradient(135deg, #ff69b4, #c084fc, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .subtitle {
+      color: #a78bfa;
+      margin-bottom: 36px;
+      font-size: 1rem;
+      text-align: center;
+    }
+    .card {
+      background: #1a1a2e;
+      border: 1px solid #2d2d50;
+      border-radius: 16px;
+      padding: 28px 32px;
+      width: 100%;
+      max-width: 720px;
+      margin-bottom: 28px;
+    }
+    .card h2 {
+      font-size: 1.2rem;
+      color: #c084fc;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .url-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .url-label {
+      font-size: 0.78rem;
+      color: #a78bfa;
+      min-width: 90px;
+    }
+    .url-box {
+      flex: 1;
+      background: #0d0d1a;
+      border: 1px solid #3b3b6a;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 0.83rem;
+      color: #93c5fd;
+      word-break: break-all;
+      user-select: all;
+    }
+    .copy-btn {
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .copy-btn:hover { opacity: 0.85; }
+    .copy-btn.copied { background: linear-gradient(135deg, #16a34a, #15803d); }
+    .open-btn {
+      display: inline-block;
+      background: transparent;
+      border: 1px solid #4f46e5;
+      color: #a5b4fc;
+      border-radius: 8px;
+      padding: 9px 16px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .open-btn:hover { background: #1e1b4b; }
+    .steps ol {
+      padding-left: 22px;
+      line-height: 2;
+      color: #d1d5db;
+      font-size: 0.95rem;
+    }
+    .steps ol li { margin-bottom: 4px; }
+    .steps code {
+      background: #0d0d1a;
+      border: 1px solid #3b3b6a;
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-size: 0.88rem;
+      color: #93c5fd;
+    }
+    .preview-wrap {
+      width: 100%;
+      aspect-ratio: 900 / 600;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #3b3b6a;
+      background: #000;
+    }
+    .preview-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    footer {
+      color: #4b4b7a;
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎂 Birthday Ball Drop</h1>
+  <p class="subtitle">OBS Overlay Hub — Happy Birthday Nicole 🎉</p>
+
+  <!-- Links & Copy -->
+  <div class="card">
+    <h2>🔗 Overlay URLs</h2>
+
+    <div class="url-row">
+      <span class="url-label">OBS Overlay</span>
+      <div class="url-box" id="url-overlay">https://MarvelShock.github.io/bday-ball-drop/overlay.html</div>
+      <button class="copy-btn" onclick="copyUrl('url-overlay', this)">Copy</button>
+      <a class="open-btn" href="https://MarvelShock.github.io/bday-ball-drop/overlay.html" target="_blank">Open</a>
+    </div>
+
+    <div class="url-row">
+      <span class="url-label">Test Page</span>
+      <div class="url-box" id="url-test">https://MarvelShock.github.io/bday-ball-drop/overlay-test.html</div>
+      <button class="copy-btn" onclick="copyUrl('url-test', this)">Copy</button>
+      <a class="open-btn" href="https://MarvelShock.github.io/bday-ball-drop/overlay-test.html" target="_blank">Open</a>
+    </div>
+  </div>
+
+  <!-- OBS Instructions -->
+  <div class="card steps">
+    <h2>📺 OBS Setup Instructions</h2>
+    <ol>
+      <li>In OBS, click <strong>+</strong> under Sources and select <strong>Browser Source</strong>.</li>
+      <li>Paste the overlay URL: <code>https://MarvelShock.github.io/bday-ball-drop/overlay.html</code></li>
+      <li>Set <strong>Width</strong> to <code>900</code> and <strong>Height</strong> to <code>600</code>.</li>
+      <li>Check <strong>Refresh browser when scene becomes active</strong>, then click OK.</li>
+    </ol>
+  </div>
+
+  <!-- Live Preview -->
+  <div class="card">
+    <h2>👁️ Live Preview (Test Overlay)</h2>
+    <div class="preview-wrap">
+      <iframe src="overlay-test.html" scrolling="no"></iframe>
+    </div>
+  </div>
+
+  <footer>MarvelShock · bday-ball-drop · GitHub Pages</footer>
+
+  <script>
+    function copyUrl(id, btn) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

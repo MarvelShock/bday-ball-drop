@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Birthday Overlay</title>
+  <title>Birthday Overlay – Test</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       width: 900px; height: 600px;
       overflow: hidden;
-      background: transparent;
+      background: #0a0014;
       font-family: 'Segoe UI', sans-serif;
     }
     #scene {
@@ -38,13 +38,6 @@
     .tz-time.done { color: #f472b6; }
 
     /* ── Ball ── */
-    #ball-track {
-      position: absolute;
-      left: 50%; top: 0;
-      transform: translateX(-50%);
-      width: 6px; height: 480px;
-      z-index: 15;
-    }
     #pole {
       position: absolute;
       left: 50%; top: 0;
@@ -81,7 +74,6 @@
       opacity: 0;
       transition: opacity 1s ease 0.5s;
       z-index: 25;
-      text-shadow: none;
       filter: drop-shadow(0 0 12px #c084fc);
     }
     #message.show { opacity: 1; }
@@ -97,8 +89,24 @@
     #confetti-canvas  { z-index: 11; }
     #sparkle-canvas   { z-index: 12; }
 
-    /* ── Test button (hidden in overlay.html) ── */
-    #test-btn { display: none; }
+    /* ── Test Button ── */
+    #test-btn {
+      position: absolute;
+      bottom: 14px; right: 14px;
+      z-index: 30;
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 22px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(192,132,252,0.5);
+      transition: opacity 0.2s;
+      letter-spacing: 0.5px;
+    }
+    #test-btn:hover { opacity: 0.88; }
   </style>
 </head>
 <body>
@@ -117,12 +125,11 @@
   <div id="pole"></div>
   <div id="ball"></div>
   <div id="message">🎉 Happy Birthday Nicole! 🎂</div>
-  <button id="test-btn">Test Celebration</button>
+  <button id="test-btn">🎉 Test Celebration</button>
 </div>
 
 <script>
-// ─────────── Config ───────────
-const BDAY_MONTH = 7;  // July (1-based)
+const BDAY_MONTH = 7;
 const BDAY_DAY   = 16;
 const ZONES = [
   { id: 'ct-et', tz: 'America/New_York' },
@@ -131,25 +138,15 @@ const ZONES = [
   { id: 'ct-pt', tz: 'America/Los_Angeles' },
 ];
 
-// ─────────── Helpers ───────────
 function targetMidnight(tz) {
-  // Returns Date of next (or current) July 16 midnight in given tz
-  const now = new Date();
-  // Build a date string for this year's birthday midnight in tz
-  const year = new Date().toLocaleString('en-US', { timeZone: tz, year: 'numeric' }).replace(/[^0-9]/g,'').slice(0,4);
-  // Use Intl to find if we've passed midnight July 16
-  const bdayStr = `${year}-${String(BDAY_MONTH).padStart(2,'0')}-${String(BDAY_DAY).padStart(2,'0')}T00:00:00`;
-  // Create a UTC equivalent of midnight in tz
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: tz,
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
   });
-  // Find offset by comparing local midnight
-  const trial = new Date(`${new Date().getFullYear()}-${String(BDAY_MONTH).padStart(2,'0')}-${String(BDAY_DAY).padStart(2,'0')}T00:00:00`);
-  // Shift to proper tz midnight via binary search approximation
-  let lo = new Date(trial.getTime() - 14*3600000);
-  let hi = new Date(trial.getTime() + 14*3600000);
+  let lo = new Date(new Date().getFullYear(), BDAY_MONTH-1, BDAY_DAY, 0, 0, 0);
+  lo = new Date(lo.getTime() - 14*3600000);
+  let hi = new Date(lo.getTime() + 28*3600000);
   for (let i = 0; i < 40; i++) {
     const mid = new Date((lo.getTime() + hi.getTime()) / 2);
     const parts = formatter.formatToParts(mid);
@@ -164,52 +161,38 @@ function targetMidnight(tz) {
   return lo;
 }
 
-function secsUntil(target) {
-  return Math.max(0, Math.floor((target - Date.now()) / 1000));
+function secsUntil(t) { return Math.max(0, Math.floor((t - Date.now()) / 1000)); }
+function fmtCountdown(s) {
+  if (s <= 0) return 'NOW! 🎂';
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sc = s%60;
+  if (h > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`;
+  return `${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`;
 }
 
-function fmtCountdown(secs) {
-  if (secs <= 0) return 'NOW! 🎂';
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  const s = secs % 60;
-  if (h > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
-
-// ─────────── Targets ───────────
 const targets = {};
 ZONES.forEach(z => { targets[z.id] = targetMidnight(z.tz); });
 
-// ─────────── Countdown tick ───────────
 let celebrated = false;
 function tickCountdown() {
-  let anyDone = false;
   ZONES.forEach(z => {
     const s = secsUntil(targets[z.id]);
     const el = document.getElementById(z.id);
     el.textContent = fmtCountdown(s);
-    if (s === 0) { el.classList.add('done'); anyDone = true; }
+    if (s === 0) el.classList.add('done');
   });
-  // Trigger when the first timezone (ET) hits 0
-  const etSecs = secsUntil(targets['ct-et']);
-  if (etSecs <= 0 && !celebrated) triggerCelebration();
+  if (secsUntil(targets['ct-et']) <= 0 && !celebrated) triggerCelebration();
 }
 setInterval(tickCountdown, 1000);
 tickCountdown();
 
-// ─────────── Ball Drop ───────────
 let ballDropped = false;
 function dropBall() {
   if (ballDropped) return;
   ballDropped = true;
   document.getElementById('ball').classList.add('dropped');
-  setTimeout(() => {
-    document.getElementById('message').classList.add('show');
-  }, 2200);
+  setTimeout(() => document.getElementById('message').classList.add('show'), 2200);
 }
 
-// ─────────── Celebration ───────────
 function triggerCelebration() {
   if (celebrated) return;
   celebrated = true;
@@ -219,7 +202,6 @@ function triggerCelebration() {
   startSparkles();
 }
 
-// Test button
 document.getElementById('test-btn').addEventListener('click', () => {
   celebrated = false; ballDropped = false;
   document.getElementById('ball').classList.remove('dropped');
@@ -230,149 +212,96 @@ document.getElementById('test-btn').addEventListener('click', () => {
 // ─────────── Fireworks ───────────
 const fwC = document.getElementById('fireworks-canvas');
 const fwCtx = fwC.getContext('2d');
-let fireworksActive = false;
-let fireworks = [], fwParticles = [];
-
+let fireworksActive = false, fireworks = [], fwParticles = [];
 function launchFireworks() {
   fireworksActive = true;
   setTimeout(() => { fireworksActive = false; }, 8000);
   requestAnimationFrame(drawFireworks);
 }
-
 function drawFireworks() {
-  fwCtx.fillStyle = 'rgba(0,0,0,0)';
-  fwCtx.clearRect(0, 0, 900, 600);
+  fwCtx.clearRect(0,0,900,600);
   fwCtx.fillStyle = 'rgba(0,0,0,0.15)';
-  fwCtx.fillRect(0, 0, 900, 600);
-
+  fwCtx.fillRect(0,0,900,600);
   if (fireworksActive && Math.random() < 0.06) {
-    fireworks.push({
-      x: 150 + Math.random() * 600,
-      y: 500, tx: 150 + Math.random() * 600,
-      ty: 60 + Math.random() * 260,
-      color: `hsl(${Math.random()*360},100%,60%)`,
-      speed: 8 + Math.random() * 4, exploded: false
-    });
+    fireworks.push({ x:150+Math.random()*600, y:500, tx:150+Math.random()*600, ty:60+Math.random()*260,
+      color:`hsl(${Math.random()*360},100%,60%)`, speed:8+Math.random()*4 });
   }
-
   fireworks = fireworks.filter(f => {
-    const dx = f.tx - f.x, dy = f.ty - f.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    if (dist < f.speed) {
-      // explode
-      for (let i = 0; i < 60; i++) {
-        const a = (Math.PI*2/60)*i;
-        const sp = 2 + Math.random()*4;
-        fwParticles.push({ x: f.x, y: f.y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
-          color: f.color, life: 1 });
-      }
+    const dx=f.tx-f.x,dy=f.ty-f.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if (dist<f.speed) {
+      for(let i=0;i<60;i++){const a=(Math.PI*2/60)*i,sp=2+Math.random()*4;
+        fwParticles.push({x:f.x,y:f.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,color:f.color,life:1});}
       return false;
     }
-    f.x += (dx/dist)*f.speed;
-    f.y += (dy/dist)*f.speed;
-    fwCtx.beginPath();
-    fwCtx.arc(f.x, f.y, 3, 0, Math.PI*2);
-    fwCtx.fillStyle = f.color;
-    fwCtx.fill();
-    return true;
+    f.x+=(dx/dist)*f.speed; f.y+=(dy/dist)*f.speed;
+    fwCtx.beginPath(); fwCtx.arc(f.x,f.y,3,0,Math.PI*2);
+    fwCtx.fillStyle=f.color; fwCtx.fill(); return true;
   });
-
-  fwParticles = fwParticles.filter(p => {
-    p.x += p.vx; p.y += p.vy + 0.06;
-    p.vx *= 0.97; p.vy *= 0.97;
-    p.life -= 0.018;
-    fwCtx.globalAlpha = p.life;
-    fwCtx.beginPath();
-    fwCtx.arc(p.x, p.y, 2.5, 0, Math.PI*2);
-    fwCtx.fillStyle = p.color;
-    fwCtx.fill();
-    fwCtx.globalAlpha = 1;
-    return p.life > 0;
+  fwParticles = fwParticles.filter(p=>{
+    p.x+=p.vx; p.y+=p.vy+0.06; p.vx*=0.97; p.vy*=0.97; p.life-=0.018;
+    fwCtx.globalAlpha=p.life; fwCtx.beginPath(); fwCtx.arc(p.x,p.y,2.5,0,Math.PI*2);
+    fwCtx.fillStyle=p.color; fwCtx.fill(); fwCtx.globalAlpha=1; return p.life>0;
   });
-
-  if (fireworks.length || fwParticles.length || fireworksActive) requestAnimationFrame(drawFireworks);
+  if(fireworks.length||fwParticles.length||fireworksActive) requestAnimationFrame(drawFireworks);
   else fwCtx.clearRect(0,0,900,600);
 }
 
 // ─────────── Confetti ───────────
 const cfC = document.getElementById('confetti-canvas');
 const cfCtx = cfC.getContext('2d');
-let confettiActive = false, confettiPieces = [];
-const CF_COLORS = ['#ff69b4','#c084fc','#60a5fa','#fbbf24','#34d399','#f87171','#fff'];
-
-function startConfetti() {
-  confettiActive = true;
-  setTimeout(() => { confettiActive = false; }, 8000);
+let confettiActive=false, confettiPieces=[];
+const CF_COLORS=['#ff69b4','#c084fc','#60a5fa','#fbbf24','#34d399','#f87171','#fff'];
+function startConfetti(){
+  confettiActive=true;
+  setTimeout(()=>{confettiActive=false;},8000);
   requestAnimationFrame(drawConfetti);
 }
-
-function drawConfetti() {
-  cfCtx.clearRect(0, 0, 900, 600);
-  if (confettiActive && Math.random() < 0.35) {
-    for (let i = 0; i < 3; i++) {
-      confettiPieces.push({
-        x: Math.random()*900, y: -10,
-        w: 6+Math.random()*8, h: 10+Math.random()*6,
-        color: CF_COLORS[Math.floor(Math.random()*CF_COLORS.length)],
-        vx: (Math.random()-0.5)*3, vy: 2+Math.random()*3,
-        rot: Math.random()*Math.PI*2, rotV: (Math.random()-0.5)*0.15
-      });
-    }
+function drawConfetti(){
+  cfCtx.clearRect(0,0,900,600);
+  if(confettiActive&&Math.random()<0.35){
+    for(let i=0;i<3;i++) confettiPieces.push({x:Math.random()*900,y:-10,
+      w:6+Math.random()*8,h:10+Math.random()*6,
+      color:CF_COLORS[Math.floor(Math.random()*CF_COLORS.length)],
+      vx:(Math.random()-0.5)*3,vy:2+Math.random()*3,
+      rot:Math.random()*Math.PI*2,rotV:(Math.random()-0.5)*0.15});
   }
-  confettiPieces = confettiPieces.filter(p => {
-    p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
-    cfCtx.save();
-    cfCtx.translate(p.x, p.y);
-    cfCtx.rotate(p.rot);
-    cfCtx.fillStyle = p.color;
-    cfCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-    cfCtx.restore();
-    return p.y < 620;
+  confettiPieces=confettiPieces.filter(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.rot+=p.rotV;
+    cfCtx.save();cfCtx.translate(p.x,p.y);cfCtx.rotate(p.rot);
+    cfCtx.fillStyle=p.color;cfCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    cfCtx.restore();return p.y<620;
   });
-  if (confettiPieces.length || confettiActive) requestAnimationFrame(drawConfetti);
+  if(confettiPieces.length||confettiActive) requestAnimationFrame(drawConfetti);
 }
 
 // ─────────── Sparkles ───────────
 const spC = document.getElementById('sparkle-canvas');
 const spCtx = spC.getContext('2d');
-let sparklesActive = false, sparkles = [];
-
-function startSparkles() {
-  sparklesActive = true;
-  setTimeout(() => { sparklesActive = false; }, 9000);
+let sparklesActive=false, sparkles=[];
+function startSparkles(){
+  sparklesActive=true;
+  setTimeout(()=>{sparklesActive=false;},9000);
   requestAnimationFrame(drawSparkles);
 }
-
-function drawSparkles() {
+function drawSparkles(){
   spCtx.clearRect(0,0,900,600);
-  if (sparklesActive && Math.random() < 0.4) {
-    sparkles.push({
-      x: Math.random()*900, y: Math.random()*600,
-      r: 1 + Math.random()*3, life: 1,
-      color: `hsl(${280+Math.random()*80},100%,80%)`
-    });
+  if(sparklesActive&&Math.random()<0.4){
+    sparkles.push({x:Math.random()*900,y:Math.random()*600,
+      r:1+Math.random()*3,life:1,color:`hsl(${280+Math.random()*80},100%,80%)`});
   }
-  sparkles = sparkles.filter(s => {
-    s.life -= 0.03;
-    spCtx.globalAlpha = s.life;
+  sparkles=sparkles.filter(s=>{
+    s.life-=0.03;
+    spCtx.globalAlpha=s.life;
     spCtx.beginPath();
-    // 4-point star
-    const r = s.r, x = s.x, y = s.y;
-    spCtx.moveTo(x, y-r*3);
-    spCtx.lineTo(x+r*0.7, y-r*0.7);
-    spCtx.lineTo(x+r*3, y);
-    spCtx.lineTo(x+r*0.7, y+r*0.7);
-    spCtx.lineTo(x, y+r*3);
-    spCtx.lineTo(x-r*0.7, y+r*0.7);
-    spCtx.lineTo(x-r*3, y);
-    spCtx.lineTo(x-r*0.7, y-r*0.7);
-    spCtx.closePath();
-    spCtx.fillStyle = s.color;
-    spCtx.fill();
-    spCtx.globalAlpha = 1;
-    return s.life > 0;
+    const r=s.r,x=s.x,y=s.y;
+    spCtx.moveTo(x,y-r*3);spCtx.lineTo(x+r*0.7,y-r*0.7);
+    spCtx.lineTo(x+r*3,y);spCtx.lineTo(x+r*0.7,y+r*0.7);
+    spCtx.lineTo(x,y+r*3);spCtx.lineTo(x-r*0.7,y+r*0.7);
+    spCtx.lineTo(x-r*3,y);spCtx.lineTo(x-r*0.7,y-r*0.7);
+    spCtx.closePath();spCtx.fillStyle=s.color;spCtx.fill();
+    spCtx.globalAlpha=1;return s.life>0;
   });
-  if (sparkles.length || sparklesActive) requestAnimationFrame(drawSparkles);
+  if(sparkles.length||sparklesActive) requestAnimationFrame(drawSparkles);
 }
 </script>
 </body>
