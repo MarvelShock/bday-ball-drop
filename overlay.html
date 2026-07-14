@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday Nicole – Ball Drop</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: transparent;
+    overflow: hidden;
+    font-family: 'Georgia', serif;
+    width: 900px;
+    height: 600px;
+  }
+
+  #overlay {
+    position: relative;
+    width: 900px;
+    height: 600px;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  /* Dark semi-transparent backdrop so overlay looks great on any stream */
+  #backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 0, 25, 0.72);
+    backdrop-filter: blur(2px);
+  }
+
+  canvas#fireworks {
+    position: absolute;
+    inset: 0;
+    width: 900px;
+    height: 600px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  canvas#confetti-canvas {
+    position: absolute;
+    inset: 0;
+    width: 900px;
+    height: 600px;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  #ball-track {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 10px;
+    width: 6px;
+    height: 300px;
+    background: linear-gradient(to bottom, rgba(255,215,0,0.6), rgba(255,215,0,0.05));
+    border-radius: 3px;
+    z-index: 4;
+  }
+
+  #ball {
+    position: absolute;
+    left: 50%;
+    top: 10px;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff8d0, #ffd700 40%, #ff8c00 70%, #c0392b);
+    box-shadow:
+      0 0 20px 6px rgba(255,215,0,0.8),
+      0 0 50px 15px rgba(255,140,0,0.5),
+      inset 0 -4px 10px rgba(0,0,0,0.4);
+    z-index: 5;
+    transition: top 0s;
+  }
+
+  #message {
+    position: absolute;
+    bottom: 40px;
+    left: 0; right: 0;
+    text-align: center;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  #message h1 {
+    font-family: 'Georgia', serif;
+    font-size: 52px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow:
+      0 0 10px #ffd700,
+      0 0 30px #ff8c00,
+      0 0 60px rgba(255,140,0,0.6),
+      2px 2px 4px rgba(0,0,0,0.9);
+    letter-spacing: 2px;
+    line-height: 1.15;
+  }
+
+  #message h1 span {
+    color: #ffd700;
+    text-shadow:
+      0 0 10px #fff,
+      0 0 20px #ffd700,
+      0 0 50px #ff8c00,
+      2px 2px 4px rgba(0,0,0,0.9);
+  }
+
+  #countdown-section {
+    position: absolute;
+    top: 20px;
+    left: 0; right: 0;
+    z-index: 10;
+    padding: 0 20px;
+  }
+
+  #countdown-section h2 {
+    text-align: center;
+    font-family: 'Georgia', serif;
+    font-size: 16px;
+    color: rgba(255, 215, 0, 0.9);
+    text-shadow: 0 0 10px rgba(255,215,0,0.6);
+    margin-bottom: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  #timezones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    max-height: 130px;
+    overflow: hidden;
+  }
+
+  .tz-card {
+    background: rgba(255,215,0,0.08);
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: 8px;
+    padding: 4px 10px;
+    text-align: center;
+    min-width: 100px;
+    transition: background 0.3s;
+  }
+
+  .tz-card.dropping {
+    background: rgba(255,100,0,0.25);
+    border-color: rgba(255,140,0,0.7);
+    animation: pulse-tz 0.6s ease;
+  }
+
+  .tz-card.done {
+    background: rgba(255,215,0,0.18);
+    border-color: rgba(255,215,0,0.8);
+  }
+
+  @keyframes pulse-tz {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); box-shadow: 0 0 15px rgba(255,140,0,0.7); }
+    100% { transform: scale(1); }
+  }
+
+  .tz-name {
+    font-size: 9px;
+    color: rgba(255,215,0,0.7);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .tz-time {
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+    font-family: 'Courier New', monospace;
+  }
+
+  .tz-countdown {
+    font-size: 10px;
+    color: rgba(255,200,100,0.9);
+    font-family: 'Courier New', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #starburst {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+
+  #starburst-text {
+    font-family: 'Georgia', serif;
+    font-size: 68px;
+    font-weight: bold;
+    color: #ffd700;
+    text-align: center;
+    line-height: 1.1;
+    text-shadow:
+      0 0 10px #fff,
+      0 0 30px #ffd700,
+      0 0 70px #ff8c00,
+      3px 3px 6px rgba(0,0,0,0.8);
+    animation: none;
+  }
+
+  @keyframes bigPop {
+    0% { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+    60% { transform: scale(1.15) rotate(2deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #ffd700;
+    pointer-events: none;
+    z-index: 6;
+    animation: sparkleFly 2s ease-out forwards;
+  }
+  @keyframes sparkleFly {
+    0% { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="overlay">
+  <div id="backdrop"></div>
+  <canvas id="fireworks"></canvas>
+  <canvas id="confetti-canvas"></canvas>
+
+  <div id="ball-track"></div>
+  <div id="ball"></div>
+
+  <div id="countdown-section">
+    <h2>&#127874; Countdown to Nicole's Birthday &bull; July 16th &#127874;</h2>
+    <div id="timezones"></div>
+  </div>
+
+  <div id="message">
+    <h1>Happy Birthday <span>Nicole</span> &#127881;</h1>
+  </div>
+
+  <div id="starburst">
+    <div id="starburst-text">&#127874;<br>Happy Birthday<br><span style="color:#fff">Nicole!</span></div>
+  </div>
+</div>
+
+<script>
+const TIMEZONES = [
+  { name: "Hawaii",    tz: "Pacific/Honolulu",     short: "HAST" },
+  { name: "Alaska",    tz: "America/Anchorage",    short: "AKST" },
+  { name: "Pacific",   tz: "America/Los_Angeles",  short: "PDT"  },
+  { name: "Mountain",  tz: "America/Denver",       short: "MDT"  },
+  { name: "Central",   tz: "America/Chicago",      short: "CDT"  },
+  { name: "Eastern",   tz: "America/New_York",     short: "EDT"  },
+  { name: "London",    tz: "Europe/London",        short: "BST"  },
+  { name: "Paris",     tz: "Europe/Paris",         short: "CEST" },
+  { name: "Moscow",    tz: "Europe/Moscow",        short: "MSK"  },
+  { name: "Dubai",     tz: "Asia/Dubai",           short: "GST"  },
+  { name: "India",     tz: "Asia/Kolkata",         short: "IST"  },
+  { name: "Bangkok",   tz: "Asia/Bangkok",         short: "ICT"  },
+  { name: "Shanghai",  tz: "Asia/Shanghai",        short: "CST"  },
+  { name: "Tokyo",     tz: "Asia/Tokyo",           short: "JST"  },
+  { name: "Sydney",    tz: "Australia/Sydney",     short: "AEST" },
+  { name: "Auckland",  tz: "Pacific/Auckland",     short: "NZST" },
+];
+
+const tzContainer = document.getElementById('timezones');
+const ball        = document.getElementById('ball');
+const message     = document.getElementById('message');
+const starburst   = document.getElementById('starburst');
+const sbText      = document.getElementById('starburst-text');
+
+TIMEZONES.forEach(tz => {
+  const card = document.createElement('div');
+  card.className = 'tz-card';
+  card.id = 'tz-' + tz.tz.replace(/\//g, '-');
+  card.innerHTML = `
+    <div class="tz-name">${tz.name} (${tz.short})</div>
+    <div class="tz-time" id="time-${tz.tz.replace(/\//g,'-')}">––:––:––</div>
+    <div class="tz-countdown" id="cd-${tz.tz.replace(/\//g,'-')}">loading…</div>
+  `;
+  tzContainer.appendChild(card);
+});
+
+function getLocalTimeInTZ(tz) {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false
+  }).format(new Date());
+}
+
+function getMidnightUTCForTZ(tz, year) {
+  let guess = Date.UTC(year, 6, 16, 12, 0, 0);
+  for (let i = 0; i < 60; i++) {
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      month: '2-digit', day: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    }).format(new Date(guess));
+    const parts = fmt.split(/[/,: ]+/).filter(Boolean);
+    const mo = parseInt(parts[0]), da = parseInt(parts[1]), yr = parseInt(parts[2]);
+    const hh = parseInt(parts[3]), mm = parseInt(parts[4]), ss = parseInt(parts[5]);
+    if (mo === 7 && da === 16 && yr === year && hh === 0 && mm === 0 && ss === 0) break;
+    let deltaSecs;
+    if (mo === 7 && da === 16 && yr === year) {
+      deltaSecs = -(hh * 3600 + mm * 60 + ss);
+    } else if (mo < 7 || (mo === 7 && da < 16) || yr < year) {
+      deltaSecs = 86400 - (hh * 3600 + mm * 60 + ss);
+    } else {
+      deltaSecs = -(86400 + hh * 3600 + mm * 60 + ss);
+    }
+    guess += deltaSecs * 1000;
+    if (Math.abs(deltaSecs) <= 1) break;
+  }
+  return guess;
+}
+
+let droppingTZ = null;
+let celebrationActive = false;
+let droppedTZs = new Set();
+
+const thisYear = new Date().getFullYear();
+const tzMidnights = {};
+TIMEZONES.forEach(tz => {
+  let midnight = getMidnightUTCForTZ(tz.tz, thisYear);
+  if (midnight < Date.now() - 1000) midnight = getMidnightUTCForTZ(tz.tz, thisYear + 1);
+  tzMidnights[tz.tz] = midnight;
+});
+
+function dropBall(tz) {
+  if (droppingTZ === tz.tz) return;
+  droppingTZ = tz.tz;
+  const card = document.getElementById('tz-' + tz.tz.replace(/\//g, '-'));
+  card.classList.add('dropping');
+  ball.style.transition = 'none';
+  ball.style.top = '10px';
+  setTimeout(() => {
+    ball.style.transition = 'top 3s cubic-bezier(0.3, 0, 0.8, 1)';
+    ball.style.top = '290px';
+    setTimeout(() => {
+      ball.style.transition = 'top 0.4s cubic-bezier(0.3, 0, 0.5, 1)';
+      ball.style.top = '240px';
+      setTimeout(() => {
+        ball.style.transition = 'top 0.3s ease-in';
+        ball.style.top = '290px';
+        setTimeout(() => {
+          card.classList.remove('dropping');
+          card.classList.add('done');
+          droppedTZs.add(tz.tz);
+          triggerCelebration();
+        }, 400);
+      }, 400);
+    }, 3200);
+  }, 50);
+}
+
+function triggerCelebration() {
+  celebrationActive = true;
+  launchFireworks();
+  launchConfetti();
+  spawnSparkles();
+  message.style.opacity = '1';
+  starburst.style.opacity = '1';
+  sbText.style.animation = 'bigPop 0.7s cubic-bezier(0.16,1,0.3,1) forwards';
+  setTimeout(() => {
+    message.style.opacity = '0';
+    starburst.style.opacity = '0';
+    sbText.style.animation = 'none';
+    celebrationActive = false;
+    droppingTZ = null;
+    ball.style.transition = 'top 0.5s ease';
+    ball.style.top = '10px';
+  }, 8000);
+}
+
+function spawnSparkles() {
+  const cx = 450, cy = 280;
+  for (let i = 0; i < 24; i++) {
+    const el = document.createElement('div');
+    el.className = 'sparkle';
+    const angle = (i / 24) * Math.PI * 2;
+    const dist = 80 + Math.random() * 120;
+    el.style.left = cx + 'px';
+    el.style.top = cy + 'px';
+    el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    el.style.setProperty('--dy', (Math.sin(angle) * dist) + 'px');
+    el.style.background = ['#ffd700','#ff8c00','#ff4500','#fff','#ff69b4'][i % 5];
+    el.style.animationDelay = (Math.random() * 0.3) + 's';
+    document.getElementById('overlay').appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+  }
+}
+
+const fwCanvas = document.getElementById('fireworks');
+fwCanvas.width = 900; fwCanvas.height = 600;
+const fwCtx = fwCanvas.getContext('2d');
+const particles = [];
+let fwActive = false;
+let fwTimer = null;
+
+function launchFireworks() {
+  fwActive = true;
+  clearTimeout(fwTimer);
+  fwTimer = setTimeout(() => { fwActive = false; }, 8000);
+  for (let b = 0; b < 8; b++) {
+    setTimeout(() => createBurst(), b * 700 + Math.random() * 300);
+  }
+  requestAnimationFrame(animateFireworks);
+}
+
+function createBurst() {
+  const x = 80 + Math.random() * 740;
+  const y = 50 + Math.random() * 300;
+  const colors = ['#ffd700','#ff8c00','#ff4500','#ffffff','#ff69b4','#00ffff','#9400d3'];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  for (let i = 0; i < 60; i++) {
+    const angle = (i / 60) * Math.PI * 2;
+    const speed = 1.5 + Math.random() * 3.5;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      alpha: 1,
+      color,
+      size: 1.5 + Math.random() * 2,
+      decay: 0.015 + Math.random() * 0.01
+    });
+  }
+}
+
+function animateFireworks() {
+  fwCtx.fillStyle = 'rgba(0,0,0,0.18)';
+  fwCtx.fillRect(0, 0, 900, 600);
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.06;
+    p.vx *= 0.98;
+    p.alpha -= p.decay;
+    fwCtx.beginPath();
+    fwCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    fwCtx.globalAlpha = Math.max(0, p.alpha);
+    fwCtx.fillStyle = p.color;
+    fwCtx.fill();
+    fwCtx.globalAlpha = 1;
+    if (p.alpha <= 0) particles.splice(i, 1);
+  }
+  if (particles.length > 0 || fwActive) requestAnimationFrame(animateFireworks);
+  else fwCtx.clearRect(0, 0, 900, 600);
+}
+
+const cfCanvas = document.getElementById('confetti-canvas');
+cfCanvas.width = 900; cfCanvas.height = 600;
+const cfCtx = cfCanvas.getContext('2d');
+const confettiPieces = [];
+let cfActive = false;
+
+function launchConfetti() {
+  cfActive = true;
+  for (let i = 0; i < 180; i++) {
+    confettiPieces.push({
+      x: Math.random() * 900,
+      y: -10 - Math.random() * 200,
+      w: 6 + Math.random() * 8,
+      h: 4 + Math.random() * 6,
+      color: ['#ffd700','#ff8c00','#ff4500','#ff69b4','#ffffff','#00e5ff','#adff2f'][Math.floor(Math.random() * 7)],
+      vx: -1.5 + Math.random() * 3,
+      vy: 2 + Math.random() * 3,
+      angle: Math.random() * Math.PI * 2,
+      spin: -0.05 + Math.random() * 0.1,
+      alpha: 1
+    });
+  }
+  setTimeout(() => { cfActive = false; }, 7000);
+  requestAnimationFrame(animateConfetti);
+}
+
+function animateConfetti() {
+  cfCtx.clearRect(0, 0, 900, 600);
+  let alive = false;
+  for (const c of confettiPieces) {
+    c.x += c.vx;
+    c.y += c.vy;
+    c.angle += c.spin;
+    if (c.y > 580) c.alpha -= 0.04;
+    if (c.alpha <= 0) continue;
+    alive = true;
+    cfCtx.save();
+    cfCtx.translate(c.x, c.y);
+    cfCtx.rotate(c.angle);
+    cfCtx.globalAlpha = c.alpha;
+    cfCtx.fillStyle = c.color;
+    cfCtx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+    cfCtx.restore();
+  }
+  if (alive || cfActive) requestAnimationFrame(animateConfetti);
+}
+
+function tick() {
+  const now = Date.now();
+  TIMEZONES.forEach(tz => {
+    const timeEl = document.getElementById('time-' + tz.tz.replace(/\//g, '-'));
+    const cdEl   = document.getElementById('cd-' + tz.tz.replace(/\//g, '-'));
+    const card   = document.getElementById('tz-' + tz.tz.replace(/\//g, '-'));
+    timeEl.textContent = getLocalTimeInTZ(tz.tz);
+    const midnight = tzMidnights[tz.tz];
+    const diff = midnight - now;
+    if (diff <= 0) {
+      cdEl.textContent = '&#127881; HAPPY BDAY!';
+      card.classList.add('done');
+      if (!droppedTZs.has(tz.tz) && !droppingTZ && !celebrationActive) dropBall(tz);
+    } else {
+      const totalSecs = Math.floor(diff / 1000);
+      const d = Math.floor(totalSecs / 86400);
+      const h = Math.floor((totalSecs % 86400) / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      const s = totalSecs % 60;
+      cdEl.textContent = d > 0
+        ? `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+        : `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+  });
+  setTimeout(tick, 1000);
+}
+
+tick();
+</script>
+</body>
+</html>
