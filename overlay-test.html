@@ -9,7 +9,6 @@
     html,body{width:900px;min-height:600px;overflow-x:hidden;background:transparent;font-family:'Quicksand',sans-serif;}
     #scene{position:relative;width:900px;height:600px;overflow:hidden;}
 
-    /* ── Zone cards ── */
     #countdown-wrap{
       position:absolute;top:10px;left:50%;
       transform:translateX(-50%);
@@ -45,9 +44,8 @@
     .tz-time{font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:1.5px;font-variant-numeric:tabular-nums;}
     .tz-time.hit{color:#f472b6;}
 
-    /* ── Arriving banner ── */
     #arriving-banner{
-      position:absolute;top:110px;left:50%;
+      position:absolute;top:108px;left:50%;
       transform:translateX(-50%);
       z-index:22;
       font-size:.82rem;font-weight:700;
@@ -58,18 +56,17 @@
     }
     #arriving-banner.show{opacity:1;}
 
-    /* ── Progress dots ── */
+    /* dots tucked right under the cards */
     #progress-dots{
-      position:absolute;top:118px;left:50%;
+      position:absolute;top:92px;left:50%;
       transform:translateX(-50%);
-      display:flex;gap:6px;z-index:22;
+      display:flex;gap:5px;z-index:22;
       flex-wrap:wrap;justify-content:center;max-width:860px;
     }
-    .pdot{width:9px;height:9px;border-radius:50%;background:rgba(244,114,182,.22);transition:background .4s,box-shadow .4s;}
-    .pdot.done-dot{background:#f472b6;box-shadow:0 0 7px #f472b6;}
-    .pdot.next-dot{background:#93c5fd;box-shadow:0 0 6px #93c5fd;}
+    .pdot{width:8px;height:8px;border-radius:50%;background:rgba(244,114,182,.22);transition:background .4s,box-shadow .4s;}
+    .pdot.done-dot{background:#f472b6;box-shadow:0 0 6px #f472b6;}
+    .pdot.next-dot{background:#93c5fd;box-shadow:0 0 5px #93c5fd;}
 
-    /* ── Pole ── */
     #pole{
       position:absolute;left:50%;top:0;
       transform:translateX(-50%);
@@ -77,7 +74,6 @@
       background:linear-gradient(to bottom,#ec4899 0%,#3b82f6 60%,#1e1b4b 100%);
       border-radius:2px;box-shadow:0 0 8px rgba(236,72,153,.4);z-index:13;
     }
-    /* ── Ball ── */
     #ball{
       position:absolute;left:50%;top:0;
       transform:translate(-50%,-50%);
@@ -86,7 +82,6 @@
       box-shadow:0 0 18px 5px rgba(236,72,153,.7),0 0 40px 10px rgba(59,130,246,.35);
       z-index:16;
     }
-    /* ── Message ── */
     #message{
       position:absolute;bottom:50px;left:50%;
       transform:translateX(-50%);
@@ -101,7 +96,7 @@
     canvas{position:absolute;top:0;left:0;width:900px;height:600px;pointer-events:none;}
     #fireworks-canvas{z-index:10;}#confetti-canvas{z-index:11;}#sparkle-canvas{z-index:12;}
 
-    /* ── TEST CONTROLS ── */
+    /* TEST CONTROLS */
     #test-controls{
       position:fixed;bottom:0;left:0;right:0;
       background:rgba(10,0,30,.92);
@@ -111,16 +106,13 @@
       z-index:200;
       font-size:.78rem;
     }
-    #test-controls label{
-      color:#f9a8d4;font-weight:700;white-space:nowrap;
-    }
+    #test-controls label{color:#f9a8d4;font-weight:700;white-space:nowrap;}
     #test-controls button{
       background:rgba(244,114,182,.18);
       border:1px solid rgba(244,114,182,.5);
       color:#fff;border-radius:8px;padding:6px 14px;
       font-family:'Quicksand',sans-serif;font-size:.78rem;font-weight:700;
-      cursor:pointer;transition:background .2s;
-      white-space:nowrap;
+      cursor:pointer;transition:background .2s;white-space:nowrap;
     }
     #test-controls button:hover{background:rgba(244,114,182,.38);}
     #tz-select{
@@ -130,10 +122,7 @@
       font-family:'Quicksand',sans-serif;font-size:.76rem;
       max-width:200px;
     }
-    #status-label{
-      color:#93c5fd;font-size:.72rem;
-      margin-left:auto;
-    }
+    #status-label{color:#93c5fd;font-size:.72rem;margin-left:auto;}
   </style>
 </head>
 <body>
@@ -145,15 +134,14 @@
   <div id="countdown-wrap">
     <div id="tz-row"></div>
   </div>
-  <div id="arriving-banner"></div>
   <div id="progress-dots"></div>
+  <div id="arriving-banner"></div>
 
   <div id="pole"></div>
   <div id="ball"></div>
   <div id="message">🎉 Happy Birthday Nicole! 🎂</div>
 </div>
 
-<!-- TEST CONTROLS -->
 <div id="test-controls">
   <label>🧪 Test Controls:</label>
   <button id="btn-celebrate">🎉 Full Celebration</button>
@@ -165,9 +153,6 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-// WORLDWIDE TIMEZONE SEQUENCE — identical to overlay.html
-// ═══════════════════════════════════════════════════════════════
 const BDAY_MONTH = 7;
 const BDAY_DAY   = 16;
 
@@ -201,7 +186,7 @@ const ZONES = [
   { label:'Chicago',       abbr:'CDT',   tz:'America/Chicago'        },
   { label:'Denver',        abbr:'MDT',   tz:'America/Denver'         },
   { label:'Phoenix',       abbr:'MST',   tz:'America/Phoenix'        },
-  { label:'Los Angeles',   abbr:'PDT',   tz:'America/Los_Angeles'    },
+  { label:'Portland',      abbr:'PDT',   tz:'America/Los_Angeles'    },
   { label:'Anchorage',     abbr:'AKDT',  tz:'America/Anchorage'      },
   { label:'Honolulu',      abbr:'HST',   tz:'Pacific/Honolulu'       },
   { label:'Pago Pago',     abbr:'SST',   tz:'Pacific/Pago_Pago'      },
@@ -234,7 +219,6 @@ const UNIQUE_MIDNIGHT = MIDNIGHT_RAW.filter((z,i,arr) =>
   i===0 || z.target.getTime() !== arr[i-1].target.getTime()
 );
 
-// ─ Build UI ─
 const WINDOW = 5;
 const tzRow  = document.getElementById('tz-row');
 const dotsEl = document.getElementById('progress-dots');
@@ -252,7 +236,6 @@ const allCards = UNIQUE_MIDNIGHT.map((z,idx) => {
   return { zone: z, card, dot };
 });
 
-// Populate zone selector
 const sel = document.getElementById('tz-select');
 UNIQUE_MIDNIGHT.forEach((z,i) => {
   const o = document.createElement('option');
@@ -264,7 +247,6 @@ UNIQUE_MIDNIGHT.forEach((z,i) => {
 let droppedCount = 0;
 let isDropping   = false;
 
-// Grace: skip zones already 30s past at load
 UNIQUE_MIDNIGHT.forEach((z,i) => {
   if (Date.now() > z.target.getTime() + 30000) droppedCount = i + 1;
 });
@@ -272,10 +254,6 @@ UNIQUE_MIDNIGHT.forEach((z,i) => {
 function getTimeEl(i){ return document.getElementById('ttime_'+i); }
 
 function renderWindow(){
-  txRow_inner();
-  statusLabel.textContent = `Zone ${Math.min(droppedCount+1, UNIQUE_MIDNIGHT.length)} / ${UNIQUE_MIDNIGHT.length}`;
-}
-function txRow_inner(){
   tzRow.innerHTML='';
   const total=UNIQUE_MIDNIGHT.length;
   let start=Math.max(0,Math.min(droppedCount-1,total-WINDOW));
@@ -287,6 +265,7 @@ function txRow_inner(){
     else if(i===droppedCount)    c.card.classList.add('next-up');
     tzRow.appendChild(c.card);
   }
+  statusLabel.textContent=`Zone ${Math.min(droppedCount+1,UNIQUE_MIDNIGHT.length)} / ${UNIQUE_MIDNIGHT.length}`;
 }
 
 function updateDots(){
@@ -300,7 +279,6 @@ function updateDots(){
 renderWindow();
 updateDots();
 
-// ─ Ball ─
 const ball=document.getElementById('ball');
 const msg =document.getElementById('message');
 
@@ -335,7 +313,6 @@ function dropForZone(i,forceFinal){
 
   if(isFinal){
     setTimeout(()=>{ banner.classList.remove('show'); },4000);
-    // auto-reset after final for test convenience
     setTimeout(()=>{
       msg.classList.remove('show');
       setBallTop(0,900,'cubic-bezier(.2,0,.6,1)');
@@ -363,7 +340,6 @@ function dropForZone(i,forceFinal){
   }
 }
 
-// ─ Tick ─
 function fmtSecs(s){
   if(s<=0)return 'NOW! 🎂';
   const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;
@@ -383,29 +359,22 @@ function tick(){
 setInterval(tick,1000);
 tick();
 
-// ═══════════════════════════════════════════════════════════════
-// TEST BUTTON WIRING
-// ═══════════════════════════════════════════════════════════════
-
-// Full Celebration — simulates final zone drop
+// TEST BUTTONS
 document.getElementById('btn-celebrate').addEventListener('click',()=>{
   if(isDropping)return;
   const i=droppedCount<UNIQUE_MIDNIGHT.length?droppedCount:UNIQUE_MIDNIGHT.length-1;
   dropForZone(i,true);
 });
 
-// Step Next Zone — advance droppedCount to next zone and trigger drop
 document.getElementById('btn-step').addEventListener('click',()=>{
   if(isDropping)return;
   if(droppedCount>=UNIQUE_MIDNIGHT.length) return;
   dropForZone(droppedCount);
 });
 
-// Simulate specific zone from dropdown
 document.getElementById('btn-sim-zone').addEventListener('click',()=>{
   if(isDropping)return;
   const idx=parseInt(sel.value,10);
-  // reset all cards after target zone to undone for clean sim
   for(let i=idx;i<UNIQUE_MIDNIGHT.length;i++){
     allCards[i].card.classList.remove('done-tz','next-up','dropping');
     allCards[i].dot.classList.remove('done-dot','next-dot');
@@ -421,7 +390,6 @@ document.getElementById('btn-sim-zone').addEventListener('click',()=>{
   setTimeout(()=>dropForZone(idx),120);
 });
 
-// Reset All
 document.getElementById('btn-reset').addEventListener('click',()=>{
   isDropping=false;
   droppedCount=0;
@@ -438,9 +406,7 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   updateDots();
 });
 
-// ═══════════════════════════════════════════════════════════════
 // FIREWORKS
-// ═══════════════════════════════════════════════════════════════
 const fwC=document.getElementById('fireworks-canvas'),fwCtx=fwC.getContext('2d');
 let fireworksActive=false,fireworks=[],fwParticles=[];
 const FW=['#f472b6','#fb7185','#60a5fa','#93c5fd','#e879f9','#f9a8d4','#bfdbfe','#fff'];

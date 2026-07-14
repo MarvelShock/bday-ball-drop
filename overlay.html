@@ -47,7 +47,7 @@
 
     /* ── Arriving banner ── */
     #arriving-banner{
-      position:absolute;top:110px;left:50%;
+      position:absolute;top:108px;left:50%;
       transform:translateX(-50%);
       z-index:22;
       font-size:.82rem;font-weight:700;
@@ -58,16 +58,16 @@
     }
     #arriving-banner.show{opacity:1;}
 
-    /* ── Progress dots ── */
+    /* ── Progress dots — tucked right under the cards ── */
     #progress-dots{
-      position:absolute;top:118px;left:50%;
+      position:absolute;top:92px;left:50%;
       transform:translateX(-50%);
-      display:flex;gap:6px;z-index:22;
+      display:flex;gap:5px;z-index:22;
       flex-wrap:wrap;justify-content:center;max-width:860px;
     }
-    .pdot{width:9px;height:9px;border-radius:50%;background:rgba(244,114,182,.22);transition:background .4s,box-shadow .4s;}
-    .pdot.done-dot{background:#f472b6;box-shadow:0 0 7px #f472b6;}
-    .pdot.next-dot{background:#93c5fd;box-shadow:0 0 6px #93c5fd;}
+    .pdot{width:8px;height:8px;border-radius:50%;background:rgba(244,114,182,.22);transition:background .4s,box-shadow .4s;}
+    .pdot.done-dot{background:#f472b6;box-shadow:0 0 6px #f472b6;}
+    .pdot.next-dot{background:#93c5fd;box-shadow:0 0 5px #93c5fd;}
 
     /* ── Pole ── */
     #pole{
@@ -111,8 +111,8 @@
   <div id="countdown-wrap">
     <div id="tz-row"></div>
   </div>
-  <div id="arriving-banner"></div>
   <div id="progress-dots"></div>
+  <div id="arriving-banner"></div>
 
   <div id="pole"></div>
   <div id="ball"></div>
@@ -120,56 +120,46 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-// WORLDWIDE TIMEZONE SEQUENCE — IANA-based, ordered earliest→latest
-// Each zone is when July 16 midnight first arrives in that region.
-// ═══════════════════════════════════════════════════════════════
 const BDAY_MONTH = 7;
 const BDAY_DAY   = 16;
 
 const ZONES = [
-  { label:'Kiritimati',    abbr:'LINT',  tz:'Pacific/Kiritimati'     }, // UTC+14
-  { label:'Samoa',         abbr:'WST',   tz:'Pacific/Apia'           }, // UTC+13
-  { label:'Tonga',         abbr:'TOT',   tz:'Pacific/Tongatapu'      }, // UTC+13
-  { label:'Auckland',      abbr:'NZST',  tz:'Pacific/Auckland'       }, // UTC+12
-  { label:'Fiji',          abbr:'FJT',   tz:'Pacific/Fiji'           }, // UTC+12
-  { label:'Sydney',        abbr:'AEST',  tz:'Australia/Sydney'       }, // UTC+10/11
-  { label:'Tokyo',         abbr:'JST',   tz:'Asia/Tokyo'             }, // UTC+9
-  { label:'Beijing',       abbr:'CST',   tz:'Asia/Shanghai'          }, // UTC+8
-  { label:'Bangkok',       abbr:'ICT',   tz:'Asia/Bangkok'           }, // UTC+7
-  { label:'Dhaka',         abbr:'BST',   tz:'Asia/Dhaka'             }, // UTC+6
-  { label:'Karachi',       abbr:'PKT',   tz:'Asia/Karachi'           }, // UTC+5
-  { label:'Dubai',         abbr:'GST',   tz:'Asia/Dubai'             }, // UTC+4
-  { label:'Moscow',        abbr:'MSK',   tz:'Europe/Moscow'          }, // UTC+3
-  { label:'Nairobi',       abbr:'EAT',   tz:'Africa/Nairobi'         }, // UTC+3
-  { label:'Istanbul',      abbr:'TRT',   tz:'Europe/Istanbul'        }, // UTC+3
-  { label:'Cairo',         abbr:'EET',   tz:'Africa/Cairo'           }, // UTC+2
-  { label:'Paris',         abbr:'CEST',  tz:'Europe/Paris'           }, // UTC+1/2
-  { label:'Lagos',         abbr:'WAT',   tz:'Africa/Lagos'           }, // UTC+1
-  { label:'London',        abbr:'BST',   tz:'Europe/London'          }, // UTC+0/1
-  { label:'Reykjavik',     abbr:'GMT',   tz:'Atlantic/Reykjavik'     }, // UTC+0
-  { label:'Azores',        abbr:'AZOT',  tz:'Atlantic/Azores'        }, // UTC-1
-  { label:'Praia',         abbr:'CVT',   tz:'Atlantic/Cape_Verde'    }, // UTC-1 (no DST)
-  { label:'São Paulo',     abbr:'BRT',   tz:'America/Sao_Paulo'      }, // UTC-3
-  { label:'Buenos Aires',  abbr:'ART',   tz:'America/Argentina/Buenos_Aires' }, // UTC-3
-  { label:'Halifax',       abbr:'ADT',   tz:'America/Halifax'        }, // UTC-3/4
-  { label:'New York',      abbr:'EDT',   tz:'America/New_York'       }, // UTC-4/5
-  { label:'Chicago',       abbr:'CDT',   tz:'America/Chicago'        }, // UTC-5/6
-  { label:'Denver',        abbr:'MDT',   tz:'America/Denver'         }, // UTC-6/7
-  { label:'Phoenix',       abbr:'MST',   tz:'America/Phoenix'        }, // UTC-7 (no DST)
-  { label:'Los Angeles',   abbr:'PDT',   tz:'America/Los_Angeles'    }, // UTC-7/8
-  { label:'Anchorage',     abbr:'AKDT',  tz:'America/Anchorage'      }, // UTC-8/9
-  { label:'Honolulu',      abbr:'HST',   tz:'Pacific/Honolulu'       }, // UTC-10
-  { label:'Pago Pago',     abbr:'SST',   tz:'Pacific/Pago_Pago'      }, // UTC-11
-  { label:'Baker Is.',     abbr:'AoE',   tz:'Pacific/Fakaofo'        }, // closest to AoE UTC-12, Fakaofo is UTC-11; use Baker/Howland concept via Etc/GMT+12
+  { label:'Kiritimati',    abbr:'LINT',  tz:'Pacific/Kiritimati'     },
+  { label:'Samoa',         abbr:'WST',   tz:'Pacific/Apia'           },
+  { label:'Tonga',         abbr:'TOT',   tz:'Pacific/Tongatapu'      },
+  { label:'Auckland',      abbr:'NZST',  tz:'Pacific/Auckland'       },
+  { label:'Fiji',          abbr:'FJT',   tz:'Pacific/Fiji'           },
+  { label:'Sydney',        abbr:'AEST',  tz:'Australia/Sydney'       },
+  { label:'Tokyo',         abbr:'JST',   tz:'Asia/Tokyo'             },
+  { label:'Beijing',       abbr:'CST',   tz:'Asia/Shanghai'          },
+  { label:'Bangkok',       abbr:'ICT',   tz:'Asia/Bangkok'           },
+  { label:'Dhaka',         abbr:'BST',   tz:'Asia/Dhaka'             },
+  { label:'Karachi',       abbr:'PKT',   tz:'Asia/Karachi'           },
+  { label:'Dubai',         abbr:'GST',   tz:'Asia/Dubai'             },
+  { label:'Moscow',        abbr:'MSK',   tz:'Europe/Moscow'          },
+  { label:'Nairobi',       abbr:'EAT',   tz:'Africa/Nairobi'         },
+  { label:'Istanbul',      abbr:'TRT',   tz:'Europe/Istanbul'        },
+  { label:'Cairo',         abbr:'EET',   tz:'Africa/Cairo'           },
+  { label:'Paris',         abbr:'CEST',  tz:'Europe/Paris'           },
+  { label:'Lagos',         abbr:'WAT',   tz:'Africa/Lagos'           },
+  { label:'London',        abbr:'BST',   tz:'Europe/London'          },
+  { label:'Reykjavik',     abbr:'GMT',   tz:'Atlantic/Reykjavik'     },
+  { label:'Azores',        abbr:'AZOT',  tz:'Atlantic/Azores'        },
+  { label:'Praia',         abbr:'CVT',   tz:'Atlantic/Cape_Verde'    },
+  { label:'São Paulo',     abbr:'BRT',   tz:'America/Sao_Paulo'      },
+  { label:'Buenos Aires',  abbr:'ART',   tz:'America/Argentina/Buenos_Aires' },
+  { label:'Halifax',       abbr:'ADT',   tz:'America/Halifax'        },
+  { label:'New York',      abbr:'EDT',   tz:'America/New_York'       },
+  { label:'Chicago',       abbr:'CDT',   tz:'America/Chicago'        },
+  { label:'Denver',        abbr:'MDT',   tz:'America/Denver'         },
+  { label:'Phoenix',       abbr:'MST',   tz:'America/Phoenix'        },
+  { label:'Portland',      abbr:'PDT',   tz:'America/Los_Angeles'    },
+  { label:'Anchorage',     abbr:'AKDT',  tz:'America/Anchorage'      },
+  { label:'Honolulu',      abbr:'HST',   tz:'Pacific/Honolulu'       },
+  { label:'Pago Pago',     abbr:'SST',   tz:'Pacific/Pago_Pago'      },
+  { label:'Baker Is.',     abbr:'AoE',   tz:'Etc/GMT+12'             },
 ];
 
-// Deduplicate: remove Fakaofo entry and replace last with Etc/GMT+12
-ZONES[ZONES.length-1] = { label:'Baker Is.', abbr:'AoE', tz:'Etc/GMT+12' };
-
-// ═══════════════════════════════════════════════════════════════
-// COMPUTE EACH ZONE'S MIDNIGHT JULY 16 (UTC instant)
-// ═══════════════════════════════════════════════════════════════
 function tzMidnight(tz) {
   const year = new Date().getFullYear();
   const fmt = new Intl.DateTimeFormat('en-US', {
@@ -192,26 +182,20 @@ function tzMidnight(tz) {
 
 const MIDNIGHT = ZONES.map(z => ({ ...z, target: tzMidnight(z.tz) }));
 MIDNIGHT.sort((a,b) => a.target - b.target);
-
-// ── Remove exact duplicates (same UTC millisecond) ──
 const UNIQUE_MIDNIGHT = MIDNIGHT.filter((z,i,arr) =>
   i===0 || z.target.getTime() !== arr[i-1].target.getTime()
 );
 
-// ═══════════════════════════════════════════════════════════════
-// SLIDING WINDOW: show 5 cards at a time centered on current zone
-// ═══════════════════════════════════════════════════════════════
-const WINDOW = 5; // number of cards visible at once
+const WINDOW = 5;
 const tzRow  = document.getElementById('tz-row');
 const dotsEl = document.getElementById('progress-dots');
 const banner = document.getElementById('arriving-banner');
 
-// Build card DOM for all zones (will slide visibility)
-const allCards = UNIQUE_MIDNIGHT.map(z => {
+const allCards = UNIQUE_MIDNIGHT.map((z,idx) => {
   const card = document.createElement('div');
   card.className = 'tz-block';
   card.innerHTML = `<div class="tz-label">${z.label}<br><span style="font-size:.5rem">${z.abbr}</span></div>` +
-                   `<div class="tz-time" id="ttime-${z.abbr.replace(/[^a-zA-Z0-9]/g,'')}_${UNIQUE_MIDNIGHT.indexOf(z)}">--:--:--</div>`;
+                   `<div class="tz-time" id="ttime_${idx}">--:--:--</div>`;
   const dot = document.createElement('div');
   dot.className = 'pdot';
   dotsEl.appendChild(dot);
@@ -221,20 +205,15 @@ const allCards = UNIQUE_MIDNIGHT.map(z => {
 let droppedCount = 0;
 let isDropping   = false;
 
-// Determine how many zones already passed before page load
 UNIQUE_MIDNIGHT.forEach((z,i) => {
   if (Date.now() > z.target.getTime() + 30000) droppedCount = i + 1;
 });
 
-function getTimeEl(i) {
-  const z = UNIQUE_MIDNIGHT[i];
-  return allCards[i].card.querySelector('.tz-time');
-}
+function getTimeEl(i) { return document.getElementById('ttime_'+i); }
 
 function renderWindow() {
   tzRow.innerHTML = '';
   const total = UNIQUE_MIDNIGHT.length;
-  // Center window on droppedCount (next zone to drop)
   let start = Math.max(0, Math.min(droppedCount - 1, total - WINDOW));
   const end = Math.min(start + WINDOW, total);
   for (let i = start; i < end; i++) {
@@ -257,9 +236,6 @@ function updateDots() {
 renderWindow();
 updateDots();
 
-// ═══════════════════════════════════════════════════════════════
-// BALL
-// ═══════════════════════════════════════════════════════════════
 const ball = document.getElementById('ball');
 const msg  = document.getElementById('message');
 
@@ -275,7 +251,6 @@ function dropForZone(i) {
   const isFinal = (i === UNIQUE_MIDNIGHT.length - 1);
   const z = UNIQUE_MIDNIGHT[i];
 
-  // Mark dropping card
   allCards[i].card.classList.remove('next-up');
   allCards[i].card.classList.add('dropping');
   allCards[i].dot.classList.add('done-dot');
@@ -286,7 +261,6 @@ function dropForZone(i) {
   const dropTo = isFinal ? 480 : 370;
   setBallTop(dropTo, isFinal ? 2400 : 1700, 'cubic-bezier(.4,0,.2,1)');
 
-  // Trigger celebration
   setTimeout(() => {
     msg.classList.add('show');
     launchFireworks();
@@ -313,9 +287,6 @@ function dropForZone(i) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// TICK
-// ═══════════════════════════════════════════════════════════════
 function fmtSecs(s) {
   if (s <= 0) return 'NOW! 🎂';
   const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;
@@ -338,9 +309,7 @@ function tick() {
 setInterval(tick, 1000);
 tick();
 
-// ═══════════════════════════════════════════════════════════════
 // FIREWORKS
-// ═══════════════════════════════════════════════════════════════
 const fwC=document.getElementById('fireworks-canvas'),fwCtx=fwC.getContext('2d');
 let fireworksActive=false,fireworks=[],fwParticles=[];
 const FW=['#f472b6','#fb7185','#60a5fa','#93c5fd','#e879f9','#f9a8d4','#bfdbfe','#fff'];
@@ -373,9 +342,7 @@ function drawFW(){
   else fwCtx.clearRect(0,0,900,600);
 }
 
-// ═══════════════════════════════════════════════════════════════
 // CONFETTI
-// ═══════════════════════════════════════════════════════════════
 const cfC=document.getElementById('confetti-canvas'),cfCtx=cfC.getContext('2d');
 let confettiActive=false,cfPieces=[];
 const CF=['#f472b6','#fb7185','#60a5fa','#93c5fd','#e879f9','#fbbf24','#fff','#f9a8d4'];
@@ -399,9 +366,7 @@ function drawCF(){
   if(cfPieces.length||confettiActive)requestAnimationFrame(drawCF);
 }
 
-// ═══════════════════════════════════════════════════════════════
 // SPARKLES
-// ═══════════════════════════════════════════════════════════════
 const spC=document.getElementById('sparkle-canvas'),spCtx=spC.getContext('2d');
 let sparklesActive=false,sparkles=[];
 function startSparkles(){

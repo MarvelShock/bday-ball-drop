@@ -30,6 +30,10 @@
       border-radius:14px;padding:20px 24px;
       margin-bottom:20px;
     }
+    .card.highlight{
+      background:rgba(244,114,182,.11);
+      border-color:rgba(244,114,182,.45);
+    }
     .link-btn{
       display:inline-block;
       background:rgba(244,114,182,.15);
@@ -48,6 +52,28 @@
       color:#93c5fd;
     }
     .link-btn.blue:hover{background:rgba(96,165,250,.28);}
+    .copy-row{
+      display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;
+    }
+    .copy-url{
+      flex:1;min-width:0;
+      background:rgba(10,0,30,.6);
+      border:1px solid rgba(96,165,250,.25);
+      border-radius:8px;padding:7px 12px;
+      color:#93c5fd;font-size:.83rem;
+      font-family:'Quicksand',sans-serif;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      cursor:text;user-select:all;
+    }
+    .copy-btn{
+      background:rgba(96,165,250,.15);
+      border:1px solid rgba(96,165,250,.35);
+      color:#93c5fd;border-radius:8px;padding:7px 14px;
+      font-family:'Quicksand',sans-serif;font-size:.78rem;font-weight:700;
+      cursor:pointer;transition:background .2s;white-space:nowrap;flex-shrink:0;
+    }
+    .copy-btn:hover{background:rgba(96,165,250,.3);}
+    .copy-btn.copied{background:rgba(52,211,153,.2);border-color:rgba(52,211,153,.4);color:#6ee7b7;}
     ol,ul{padding-left:20px;color:#cbd5e1;line-height:1.9;font-size:.95rem;}
     ol li,ul li{margin-bottom:4px;}
     code{
@@ -72,6 +98,26 @@
   <h1>🎉 Birthday Ball Drop</h1>
   <p class="tagline">A worldwide Happy Birthday Nicole celebration — live OBS overlay for July 16</p>
 
+  <!-- URLS FIRST — easy copy-paste -->
+  <div class="card highlight">
+    <h2>📋 Quick Copy URLs</h2>
+    <p>Paste these directly into OBS Browser Source:</p>
+
+    <p style="color:#f9a8d4;font-size:.82rem;font-weight:700;margin:12px 0 4px;">🎬 Live OBS Overlay</p>
+    <div class="copy-row">
+      <input class="copy-url" readonly value="https://MarvelShock.github.io/bday-ball-drop/overlay.html" />
+      <button class="copy-btn" onclick="copyUrl(this)">Copy</button>
+    </div>
+    <a class="link-btn" href="https://MarvelShock.github.io/bday-ball-drop/overlay.html" target="_blank" style="margin-top:8px">Open overlay.html ↗</a>
+
+    <p style="color:#93c5fd;font-size:.82rem;font-weight:700;margin:16px 0 4px;">🧪 Test &amp; Preview Page</p>
+    <div class="copy-row">
+      <input class="copy-url" readonly value="https://MarvelShock.github.io/bday-ball-drop/overlay-test.html" />
+      <button class="copy-btn" onclick="copyUrl(this)">Copy</button>
+    </div>
+    <a class="link-btn blue" href="https://MarvelShock.github.io/bday-ball-drop/overlay-test.html" target="_blank" style="margin-top:8px">Open overlay-test.html ↗</a>
+  </div>
+
   <div class="card">
     <h2>What This Does</h2>
     <p>
@@ -86,6 +132,29 @@
       The background is <strong>fully transparent</strong> for OBS chroma-key-free compositing.
       Only visible UI elements (cards, ball, text, particles) are colored.
     </p>
+  </div>
+
+  <div class="card">
+    <h2>OBS Setup Instructions</h2>
+    <ol>
+      <li>In OBS, click <strong>+</strong> under Sources → choose <strong>Browser Source</strong></li>
+      <li>Paste the overlay URL from the Quick Copy box above</li>
+      <li>Set <strong>Width: 900</strong>, <strong>Height: 600</strong></li>
+      <li>Enable <strong>"Refresh browser when scene becomes active"</strong></li>
+      <li>The background is transparent — no chroma key needed</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>Test Page Controls</h2>
+    <p>Open <a href="https://MarvelShock.github.io/bday-ball-drop/overlay-test.html" style="color:#93c5fd" target="_blank">overlay-test.html</a> in a browser to access the test panel at the bottom:</p>
+    <ul>
+      <li><strong>🎉 Full Celebration</strong> — triggers the full ball drop + fireworks/confetti/sparkles immediately</li>
+      <li><strong>⏭ Step Next Zone</strong> — advances one timezone and plays its celebration, then resets ball</li>
+      <li><strong>Zone dropdown + ▶ Simulate Zone</strong> — jump to any specific timezone and simulate its midnight drop</li>
+      <li><strong>↺ Reset All</strong> — resets the entire sequence back to zone 1</li>
+    </ul>
+    <p>A status indicator in the test bar shows which zone number you're currently on out of the total.</p>
   </div>
 
   <div class="card">
@@ -117,7 +186,7 @@
         <tr><td>21</td><td>Chicago</td><td>America/Chicago</td><td>UTC−5/6</td></tr>
         <tr><td>22</td><td>Denver</td><td>America/Denver</td><td>UTC−6/7</td></tr>
         <tr><td>23</td><td>Phoenix</td><td>America/Phoenix</td><td>UTC−7</td></tr>
-        <tr><td>24</td><td>Los Angeles</td><td>America/Los_Angeles</td><td>UTC−7/8</td></tr>
+        <tr><td>24</td><td>Portland</td><td>America/Los_Angeles</td><td>UTC−7/8</td></tr>
         <tr><td>25</td><td>Anchorage</td><td>America/Anchorage</td><td>UTC−8/9</td></tr>
         <tr><td>26</td><td>Honolulu</td><td>Pacific/Honolulu</td><td>UTC−10</td></tr>
         <tr><td>27</td><td>Pago Pago</td><td>Pacific/Pago_Pago</td><td>UTC−11</td></tr>
@@ -126,41 +195,18 @@
     </table>
   </div>
 
-  <div class="card">
-    <h2>Live Overlay Links</h2>
-    <p>Add to OBS as a <strong>Browser Source</strong> at <code>900 × 600</code>:</p>
-    <a class="link-btn" href="https://MarvelShock.github.io/bday-ball-drop/overlay.html" target="_blank">
-      overlay.html — Live OBS Overlay
-    </a>
-    <a class="link-btn blue" href="https://MarvelShock.github.io/bday-ball-drop/overlay-test.html" target="_blank">
-      overlay-test.html — Test &amp; Preview
-    </a>
-  </div>
-
-  <div class="card">
-    <h2>OBS Setup Instructions</h2>
-    <ol>
-      <li>In OBS, click <strong>+</strong> under Sources → choose <strong>Browser Source</strong></li>
-      <li>Paste the overlay URL:<br><code>https://MarvelShock.github.io/bday-ball-drop/overlay.html</code></li>
-      <li>Set <strong>Width: 900</strong>, <strong>Height: 600</strong></li>
-      <li>Enable <strong>"Refresh browser when scene becomes active"</strong></li>
-      <li>The background is transparent — no chroma key needed</li>
-    </ol>
-  </div>
-
-  <div class="card">
-    <h2>Test Page Controls</h2>
-    <p>Open <a href="https://MarvelShock.github.io/bday-ball-drop/overlay-test.html" style="color:#93c5fd" target="_blank">overlay-test.html</a> in a browser to access the test panel at the bottom:</p>
-    <ul>
-      <li><strong>🎉 Full Celebration</strong> — triggers the full ball drop + fireworks/confetti/sparkles immediately</li>
-      <li><strong>⏭ Step Next Zone</strong> — advances one timezone and plays its celebration, then resets ball</li>
-      <li><strong>Zone dropdown + ▶ Simulate Zone</strong> — jump to any specific timezone and simulate its midnight drop</li>
-      <li><strong>↺ Reset All</strong> — resets the entire sequence back to zone 1</li>
-    </ul>
-    <p>A status indicator in the test bar shows which zone number you're currently on out of the total.</p>
-  </div>
-
   <footer>Birthday Ball Drop · MarvelShock · GitHub Pages · Built with plain HTML/CSS/JS</footer>
 </div>
+
+<script>
+function copyUrl(btn) {
+  const input = btn.previousElementSibling;
+  navigator.clipboard.writeText(input.value).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
 </body>
 </html>
