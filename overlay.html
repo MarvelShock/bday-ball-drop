@@ -1,18 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Happy Birthday Nicole – Ball Drop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     background: transparent;
     overflow: hidden;
-    font-family: 'Georgia', serif;
     width: 900px;
     height: 600px;
+    font-family: 'Nunito', sans-serif;
   }
 
   #overlay {
@@ -23,12 +26,26 @@
     overflow: hidden;
   }
 
-  /* Dark semi-transparent backdrop so overlay looks great on any stream */
+  /* Pink-to-blue gradient backdrop */
   #backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(10, 0, 25, 0.72);
+    background: linear-gradient(135deg,
+      rgba(30, 0, 40, 0.82) 0%,
+      rgba(20, 0, 50, 0.82) 50%,
+      rgba(0, 10, 40, 0.82) 100%);
     backdrop-filter: blur(2px);
+  }
+
+  /* Ambient glow blobs */
+  #backdrop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 40%, rgba(255,105,180,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 80% 60%, rgba(100,149,237,0.18) 0%, transparent 70%);
+    pointer-events: none;
   }
 
   canvas#fireworks {
@@ -49,38 +66,46 @@
     z-index: 3;
   }
 
+  /* Ball track */
   #ball-track {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     top: 10px;
-    width: 6px;
+    width: 5px;
     height: 300px;
-    background: linear-gradient(to bottom, rgba(255,215,0,0.6), rgba(255,215,0,0.05));
+    background: linear-gradient(to bottom, rgba(255,105,180,0.8), rgba(100,149,237,0.1));
     border-radius: 3px;
     z-index: 4;
   }
 
+  /* Glowing ball — pink-to-blue */
   #ball {
     position: absolute;
     left: 50%;
     top: 10px;
     transform: translateX(-50%);
-    width: 60px;
-    height: 60px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #fff8d0, #ffd700 40%, #ff8c00 70%, #c0392b);
+    background: radial-gradient(circle at 35% 35%,
+      #fff0f8,
+      #ff69b4 35%,
+      #da70d6 60%,
+      #6495ed 85%,
+      #1e3a8a);
     box-shadow:
-      0 0 20px 6px rgba(255,215,0,0.8),
-      0 0 50px 15px rgba(255,140,0,0.5),
-      inset 0 -4px 10px rgba(0,0,0,0.4);
+      0 0 18px 6px rgba(255,105,180,0.85),
+      0 0 45px 15px rgba(100,149,237,0.45),
+      inset 0 -4px 10px rgba(0,0,0,0.35);
     z-index: 5;
     transition: top 0s;
   }
 
+  /* Happy Birthday message */
   #message {
     position: absolute;
-    bottom: 40px;
+    bottom: 36px;
     left: 0; right: 0;
     text-align: center;
     z-index: 10;
@@ -89,105 +114,111 @@
   }
 
   #message h1 {
-    font-family: 'Georgia', serif;
-    font-size: 52px;
-    font-weight: bold;
+    font-family: 'Pacifico', cursive;
+    font-size: 50px;
+    font-weight: 400;
     color: #fff;
     text-shadow:
-      0 0 10px #ffd700,
-      0 0 30px #ff8c00,
-      0 0 60px rgba(255,140,0,0.6),
-      2px 2px 4px rgba(0,0,0,0.9);
-    letter-spacing: 2px;
-    line-height: 1.15;
+      0 0 12px #ff69b4,
+      0 0 35px #da70d6,
+      0 0 60px rgba(100,149,237,0.7),
+      2px 2px 5px rgba(0,0,0,0.9);
+    letter-spacing: 1px;
+    line-height: 1.2;
   }
 
   #message h1 span {
-    color: #ffd700;
+    color: #ffb3de;
     text-shadow:
       0 0 10px #fff,
-      0 0 20px #ffd700,
-      0 0 50px #ff8c00,
+      0 0 22px #ff69b4,
+      0 0 50px #6495ed,
       2px 2px 4px rgba(0,0,0,0.9);
   }
 
+  /* Countdown section */
   #countdown-section {
     position: absolute;
-    top: 20px;
+    top: 16px;
     left: 0; right: 0;
     z-index: 10;
-    padding: 0 20px;
+    padding: 0 18px;
   }
 
   #countdown-section h2 {
     text-align: center;
-    font-family: 'Georgia', serif;
-    font-size: 16px;
-    color: rgba(255, 215, 0, 0.9);
-    text-shadow: 0 0 10px rgba(255,215,0,0.6);
+    font-family: 'Pacifico', cursive;
+    font-size: 15px;
+    font-weight: 400;
+    background: linear-gradient(90deg, #ff69b4, #b57bee, #6495ed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 6px rgba(255,105,180,0.5));
     margin-bottom: 8px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
+    letter-spacing: 2px;
   }
 
   #timezones {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 6px;
-    max-height: 130px;
+    gap: 5px;
+    max-height: 132px;
     overflow: hidden;
   }
 
   .tz-card {
-    background: rgba(255,215,0,0.08);
-    border: 1px solid rgba(255,215,0,0.25);
-    border-radius: 8px;
-    padding: 4px 10px;
+    background: rgba(255,105,180,0.07);
+    border: 1px solid rgba(255,105,180,0.2);
+    border-radius: 10px;
+    padding: 4px 9px;
     text-align: center;
-    min-width: 100px;
-    transition: background 0.3s;
+    min-width: 98px;
+    transition: background 0.3s, border-color 0.3s;
   }
 
   .tz-card.dropping {
-    background: rgba(255,100,0,0.25);
-    border-color: rgba(255,140,0,0.7);
+    background: rgba(218,112,214,0.28);
+    border-color: rgba(255,105,180,0.8);
     animation: pulse-tz 0.6s ease;
   }
 
   .tz-card.done {
-    background: rgba(255,215,0,0.18);
-    border-color: rgba(255,215,0,0.8);
+    background: rgba(100,149,237,0.16);
+    border-color: rgba(100,149,237,0.7);
   }
 
   @keyframes pulse-tz {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.08); box-shadow: 0 0 15px rgba(255,140,0,0.7); }
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.09); box-shadow: 0 0 14px rgba(255,105,180,0.75); }
     100% { transform: scale(1); }
   }
 
   .tz-name {
-    font-size: 9px;
-    color: rgba(255,215,0,0.7);
+    font-size: 8.5px;
+    color: rgba(255,182,220,0.75);
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-weight: 700;
   }
 
   .tz-time {
     font-size: 13px;
-    font-weight: bold;
+    font-weight: 800;
     color: #fff;
     font-variant-numeric: tabular-nums;
-    font-family: 'Courier New', monospace;
+    font-family: 'Nunito', monospace;
   }
 
   .tz-countdown {
     font-size: 10px;
-    color: rgba(255,200,100,0.9);
-    font-family: 'Courier New', monospace;
+    color: rgba(180,190,255,0.9);
+    font-family: 'Nunito', monospace;
     font-variant-numeric: tabular-nums;
   }
 
+  /* Big starburst pop */
   #starburst {
     position: absolute;
     inset: 0;
@@ -201,39 +232,66 @@
   }
 
   #starburst-text {
-    font-family: 'Georgia', serif;
-    font-size: 68px;
-    font-weight: bold;
-    color: #ffd700;
+    font-family: 'Pacifico', cursive;
+    font-size: 64px;
+    font-weight: 400;
+    background: linear-gradient(135deg, #ff69b4 0%, #da70d6 50%, #6495ed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-align: center;
-    line-height: 1.1;
-    text-shadow:
-      0 0 10px #fff,
-      0 0 30px #ffd700,
-      0 0 70px #ff8c00,
-      3px 3px 6px rgba(0,0,0,0.8);
+    line-height: 1.15;
+    filter:
+      drop-shadow(0 0 12px rgba(255,105,180,0.9))
+      drop-shadow(0 0 30px rgba(100,149,237,0.6));
     animation: none;
   }
 
   @keyframes bigPop {
-    0% { transform: scale(0.3) rotate(-5deg); opacity: 0; }
-    60% { transform: scale(1.15) rotate(2deg); opacity: 1; }
+    0%   { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+    60%  { transform: scale(1.15) rotate(2deg); opacity: 1; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
 
+  /* Sparkles */
   .sparkle {
     position: absolute;
-    width: 6px; height: 6px;
+    width: 7px; height: 7px;
     border-radius: 50%;
-    background: #ffd700;
     pointer-events: none;
     z-index: 6;
-    animation: sparkleFly 2s ease-out forwards;
+    animation: sparkleFly 2.2s ease-out forwards;
   }
   @keyframes sparkleFly {
-    0% { transform: translate(0,0) scale(1); opacity: 1; }
+    0%   { transform: translate(0,0) scale(1); opacity: 1; }
     100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
   }
+
+  /* ── TEST BUTTON ── */
+  #test-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 12px;
+    z-index: 30;
+    background: linear-gradient(135deg, #ff69b4, #6495ed);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(255,105,180,0.5);
+    text-transform: uppercase;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  #test-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 18px rgba(100,149,237,0.7);
+  }
+  #test-btn:active { transform: scale(0.97); }
 </style>
 </head>
 <body>
@@ -255,28 +313,30 @@
   </div>
 
   <div id="starburst">
-    <div id="starburst-text">&#127874;<br>Happy Birthday<br><span style="color:#fff">Nicole!</span></div>
+    <div id="starburst-text">&#127874;<br>Happy Birthday<br>Nicole!</div>
   </div>
+
+  <button id="test-btn" onclick="testCelebration()">&#10024; Test It!</button>
 </div>
 
 <script>
 const TIMEZONES = [
-  { name: "Hawaii",    tz: "Pacific/Honolulu",     short: "HAST" },
-  { name: "Alaska",    tz: "America/Anchorage",    short: "AKST" },
-  { name: "Pacific",   tz: "America/Los_Angeles",  short: "PDT"  },
-  { name: "Mountain",  tz: "America/Denver",       short: "MDT"  },
-  { name: "Central",   tz: "America/Chicago",      short: "CDT"  },
-  { name: "Eastern",   tz: "America/New_York",     short: "EDT"  },
-  { name: "London",    tz: "Europe/London",        short: "BST"  },
-  { name: "Paris",     tz: "Europe/Paris",         short: "CEST" },
-  { name: "Moscow",    tz: "Europe/Moscow",        short: "MSK"  },
-  { name: "Dubai",     tz: "Asia/Dubai",           short: "GST"  },
-  { name: "India",     tz: "Asia/Kolkata",         short: "IST"  },
-  { name: "Bangkok",   tz: "Asia/Bangkok",         short: "ICT"  },
-  { name: "Shanghai",  tz: "Asia/Shanghai",        short: "CST"  },
-  { name: "Tokyo",     tz: "Asia/Tokyo",           short: "JST"  },
-  { name: "Sydney",    tz: "Australia/Sydney",     short: "AEST" },
-  { name: "Auckland",  tz: "Pacific/Auckland",     short: "NZST" },
+  { name: "Hawaii",   tz: "Pacific/Honolulu",    short: "HST"  },
+  { name: "Alaska",   tz: "America/Anchorage",   short: "AKT"  },
+  { name: "Pacific",  tz: "America/Los_Angeles", short: "PDT"  },
+  { name: "Mountain", tz: "America/Denver",      short: "MDT"  },
+  { name: "Central",  tz: "America/Chicago",     short: "CDT"  },
+  { name: "Eastern",  tz: "America/New_York",    short: "EDT"  },
+  { name: "London",   tz: "Europe/London",       short: "BST"  },
+  { name: "Paris",    tz: "Europe/Paris",        short: "CEST" },
+  { name: "Moscow",   tz: "Europe/Moscow",       short: "MSK"  },
+  { name: "Dubai",    tz: "Asia/Dubai",          short: "GST"  },
+  { name: "India",    tz: "Asia/Kolkata",        short: "IST"  },
+  { name: "Bangkok",  tz: "Asia/Bangkok",        short: "ICT"  },
+  { name: "Shanghai", tz: "Asia/Shanghai",       short: "CST"  },
+  { name: "Tokyo",    tz: "Asia/Tokyo",          short: "JST"  },
+  { name: "Sydney",   tz: "Australia/Sydney",    short: "AEST" },
+  { name: "Auckland", tz: "Pacific/Auckland",    short: "NZST" },
 ];
 
 const tzContainer = document.getElementById('timezones');
@@ -291,8 +351,8 @@ TIMEZONES.forEach(tz => {
   card.id = 'tz-' + tz.tz.replace(/\//g, '-');
   card.innerHTML = `
     <div class="tz-name">${tz.name} (${tz.short})</div>
-    <div class="tz-time" id="time-${tz.tz.replace(/\//g,'-')}">––:––:––</div>
-    <div class="tz-countdown" id="cd-${tz.tz.replace(/\//g,'-')}">loading…</div>
+    <div class="tz-time" id="time-${tz.tz.replace(/\//g,'-')}">--:--:--</div>
+    <div class="tz-countdown" id="cd-${tz.tz.replace(/\//g,'-')}">loading...</div>
   `;
   tzContainer.appendChild(card);
 });
@@ -300,8 +360,7 @@ TIMEZONES.forEach(tz => {
 function getLocalTimeInTZ(tz) {
   return new Intl.DateTimeFormat('en-US', {
     timeZone: tz,
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-    hour12: false
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
   }).format(new Date());
 }
 
@@ -309,8 +368,7 @@ function getMidnightUTCForTZ(tz, year) {
   let guess = Date.UTC(year, 6, 16, 12, 0, 0);
   for (let i = 0; i < 60; i++) {
     const fmt = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz,
-      month: '2-digit', day: '2-digit', year: 'numeric',
+      timeZone: tz, month: '2-digit', day: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
     }).format(new Date(guess));
     const parts = fmt.split(/[/,: ]+/).filter(Boolean);
@@ -343,11 +401,7 @@ TIMEZONES.forEach(tz => {
   tzMidnights[tz.tz] = midnight;
 });
 
-function dropBall(tz) {
-  if (droppingTZ === tz.tz) return;
-  droppingTZ = tz.tz;
-  const card = document.getElementById('tz-' + tz.tz.replace(/\//g, '-'));
-  card.classList.add('dropping');
+function animateBallDrop(onComplete) {
   ball.style.transition = 'none';
   ball.style.top = '10px';
   setTimeout(() => {
@@ -359,15 +413,33 @@ function dropBall(tz) {
       setTimeout(() => {
         ball.style.transition = 'top 0.3s ease-in';
         ball.style.top = '290px';
-        setTimeout(() => {
-          card.classList.remove('dropping');
-          card.classList.add('done');
-          droppedTZs.add(tz.tz);
-          triggerCelebration();
-        }, 400);
+        setTimeout(onComplete, 400);
       }, 400);
     }, 3200);
   }, 50);
+}
+
+function dropBall(tz) {
+  if (droppingTZ === tz.tz) return;
+  droppingTZ = tz.tz;
+  const card = document.getElementById('tz-' + tz.tz.replace(/\//g, '-'));
+  card.classList.add('dropping');
+  animateBallDrop(() => {
+    card.classList.remove('dropping');
+    card.classList.add('done');
+    droppedTZs.add(tz.tz);
+    triggerCelebration();
+  });
+}
+
+// TEST BUTTON — triggers full ball drop + celebration immediately
+function testCelebration() {
+  if (celebrationActive || droppingTZ) return;
+  droppingTZ = '__test__';
+  animateBallDrop(() => {
+    droppingTZ = null;
+    triggerCelebration();
+  });
 }
 
 function triggerCelebration() {
@@ -384,75 +456,77 @@ function triggerCelebration() {
     sbText.style.animation = 'none';
     celebrationActive = false;
     droppingTZ = null;
-    ball.style.transition = 'top 0.5s ease';
+    ball.style.transition = 'top 0.6s ease';
     ball.style.top = '10px';
   }, 8000);
 }
 
 function spawnSparkles() {
-  const cx = 450, cy = 280;
-  for (let i = 0; i < 24; i++) {
+  const cx = 450, cy = 295;
+  const colors = ['#ff69b4','#ffb3de','#da70d6','#6495ed','#b0c4ff','#fff'];
+  for (let i = 0; i < 28; i++) {
     const el = document.createElement('div');
     el.className = 'sparkle';
-    const angle = (i / 24) * Math.PI * 2;
-    const dist = 80 + Math.random() * 120;
+    const angle = (i / 28) * Math.PI * 2;
+    const dist = 90 + Math.random() * 130;
     el.style.left = cx + 'px';
     el.style.top = cy + 'px';
     el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
     el.style.setProperty('--dy', (Math.sin(angle) * dist) + 'px');
-    el.style.background = ['#ffd700','#ff8c00','#ff4500','#fff','#ff69b4'][i % 5];
-    el.style.animationDelay = (Math.random() * 0.3) + 's';
+    el.style.background = colors[i % colors.length];
+    el.style.animationDelay = (Math.random() * 0.4) + 's';
     document.getElementById('overlay').appendChild(el);
-    setTimeout(() => el.remove(), 2500);
+    setTimeout(() => el.remove(), 2800);
   }
 }
 
+// ── Fireworks ────────────────────────────────────────────────────
 const fwCanvas = document.getElementById('fireworks');
 fwCanvas.width = 900; fwCanvas.height = 600;
 const fwCtx = fwCanvas.getContext('2d');
 const particles = [];
-let fwActive = false;
-let fwTimer = null;
+let fwActive = false, fwTimer = null;
 
 function launchFireworks() {
   fwActive = true;
   clearTimeout(fwTimer);
   fwTimer = setTimeout(() => { fwActive = false; }, 8000);
-  for (let b = 0; b < 8; b++) {
-    setTimeout(() => createBurst(), b * 700 + Math.random() * 300);
+  for (let b = 0; b < 9; b++) {
+    setTimeout(() => createBurst(), b * 650 + Math.random() * 250);
   }
   requestAnimationFrame(animateFireworks);
 }
 
 function createBurst() {
   const x = 80 + Math.random() * 740;
-  const y = 50 + Math.random() * 300;
-  const colors = ['#ffd700','#ff8c00','#ff4500','#ffffff','#ff69b4','#00ffff','#9400d3'];
+  const y = 40 + Math.random() * 280;
+  // Pink & blue palette for fireworks
+  const colors = ['#ff69b4','#ffb3de','#da70d6','#6495ed','#b0c4ff','#ffffff','#c084fc','#f9a8d4'];
   const color = colors[Math.floor(Math.random() * colors.length)];
-  for (let i = 0; i < 60; i++) {
-    const angle = (i / 60) * Math.PI * 2;
-    const speed = 1.5 + Math.random() * 3.5;
+  for (let i = 0; i < 64; i++) {
+    const angle = (i / 64) * Math.PI * 2;
+    const speed = 1.5 + Math.random() * 4;
     particles.push({
       x, y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       alpha: 1,
       color,
-      size: 1.5 + Math.random() * 2,
-      decay: 0.015 + Math.random() * 0.01
+      size: 1.5 + Math.random() * 2.5,
+      decay: 0.013 + Math.random() * 0.01
     });
   }
 }
 
 function animateFireworks() {
-  fwCtx.fillStyle = 'rgba(0,0,0,0.18)';
+  fwCtx.fillStyle = 'rgba(0,0,0,0.16)';
   fwCtx.fillRect(0, 0, 900, 600);
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
     p.x += p.vx;
     p.y += p.vy;
-    p.vy += 0.06;
-    p.vx *= 0.98;
+    p.vy += 0.055;
+    p.vx *= 0.985;
     p.alpha -= p.decay;
     fwCtx.beginPath();
     fwCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -466,6 +540,7 @@ function animateFireworks() {
   else fwCtx.clearRect(0, 0, 900, 600);
 }
 
+// ── Confetti ─────────────────────────────────────────────────────
 const cfCanvas = document.getElementById('confetti-canvas');
 cfCanvas.width = 900; cfCanvas.height = 600;
 const cfCtx = cfCanvas.getContext('2d');
@@ -474,17 +549,18 @@ let cfActive = false;
 
 function launchConfetti() {
   cfActive = true;
-  for (let i = 0; i < 180; i++) {
+  const colors = ['#ff69b4','#ffb3de','#da70d6','#6495ed','#b0c4ff','#ffffff','#f9a8d4','#c084fc'];
+  for (let i = 0; i < 200; i++) {
     confettiPieces.push({
       x: Math.random() * 900,
       y: -10 - Math.random() * 200,
-      w: 6 + Math.random() * 8,
-      h: 4 + Math.random() * 6,
-      color: ['#ffd700','#ff8c00','#ff4500','#ff69b4','#ffffff','#00e5ff','#adff2f'][Math.floor(Math.random() * 7)],
+      w: 6 + Math.random() * 9,
+      h: 4 + Math.random() * 7,
+      color: colors[Math.floor(Math.random() * colors.length)],
       vx: -1.5 + Math.random() * 3,
-      vy: 2 + Math.random() * 3,
+      vy: 2 + Math.random() * 3.5,
       angle: Math.random() * Math.PI * 2,
-      spin: -0.05 + Math.random() * 0.1,
+      spin: -0.06 + Math.random() * 0.12,
       alpha: 1
     });
   }
@@ -499,7 +575,7 @@ function animateConfetti() {
     c.x += c.vx;
     c.y += c.vy;
     c.angle += c.spin;
-    if (c.y > 580) c.alpha -= 0.04;
+    if (c.y > 580) c.alpha -= 0.05;
     if (c.alpha <= 0) continue;
     alive = true;
     cfCtx.save();
@@ -513,6 +589,7 @@ function animateConfetti() {
   if (alive || cfActive) requestAnimationFrame(animateConfetti);
 }
 
+// ── Main tick ─────────────────────────────────────────────────────
 function tick() {
   const now = Date.now();
   TIMEZONES.forEach(tz => {
@@ -523,7 +600,7 @@ function tick() {
     const midnight = tzMidnights[tz.tz];
     const diff = midnight - now;
     if (diff <= 0) {
-      cdEl.textContent = '&#127881; HAPPY BDAY!';
+      cdEl.textContent = '🎉 HAPPY BDAY!';
       card.classList.add('done');
       if (!droppedTZs.has(tz.tz) && !droppingTZ && !celebrationActive) dropBall(tz);
     } else {
