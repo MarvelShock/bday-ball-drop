@@ -3,115 +3,162 @@
 <head>
   <meta charset="UTF-8" />
   <title>Birthday Overlay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      width: 900px; height: 600px;
-      overflow: hidden;
-      background: transparent;
-      font-family: 'Segoe UI', sans-serif;
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html,body {
+      width:900px; height:600px;
+      overflow:hidden;
+      background:transparent;
+      font-family:'Quicksand',sans-serif;
     }
-    #scene {
-      position: relative;
-      width: 900px; height: 600px;
-      overflow: hidden;
+    #scene { position:relative; width:900px; height:600px; overflow:hidden; }
+
+    /* ── Pink/Blue gradient glow bg (subtle, transparent-friendly) ── */
+    #bg-glow {
+      position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse 600px 300px at 50% 110%, rgba(244,114,182,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 400px 200px at 20% 0%,  rgba(96,165,250,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 400px 200px at 80% 0%,  rgba(244,114,182,0.10) 0%, transparent 70%);
+      pointer-events:none; z-index:1;
     }
-    /* ── Countdown ── */
+
+    /* ── Countdown rotator ── */
     #countdown-wrap {
-      position: absolute;
-      top: 18px; left: 50%;
-      transform: translateX(-50%);
-      display: flex; gap: 18px;
-      z-index: 20;
+      position:absolute;
+      top:18px; left:50%;
+      transform:translateX(-50%);
+      z-index:20;
+      width:680px;
+      height:88px;
+      perspective:800px;
+    }
+    .tz-stage {
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      gap:14px;
+      opacity:0;
+      transform:rotateX(60deg) translateY(-20px);
+      transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.4,0,.2,1);
+      pointer-events:none;
+    }
+    .tz-stage.active {
+      opacity:1;
+      transform:rotateX(0deg) translateY(0);
+    }
+    .tz-stage.exit {
+      opacity:0;
+      transform:rotateX(-60deg) translateY(20px);
     }
     .tz-block {
-      background: rgba(10,0,30,0.72);
-      border: 1px solid rgba(180,100,255,0.4);
-      border-radius: 12px;
-      padding: 10px 16px;
-      text-align: center;
-      min-width: 130px;
-      backdrop-filter: blur(4px);
+      background:rgba(10,0,30,0.65);
+      border:1px solid rgba(244,114,182,0.45);
+      border-radius:14px;
+      padding:10px 18px;
+      text-align:center;
+      min-width:148px;
+      backdrop-filter:blur(6px);
+      box-shadow: 0 0 16px rgba(244,114,182,0.15), inset 0 1px 0 rgba(255,255,255,0.07);
     }
-    .tz-label { font-size: 0.65rem; color: #a78bfa; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-    .tz-time  { font-size: 1.55rem; font-weight: 700; color: #fff; letter-spacing: 2px; font-variant-numeric: tabular-nums; }
-    .tz-time.done { color: #f472b6; }
+    .tz-block.highlight {
+      border-color:rgba(96,165,250,0.7);
+      box-shadow: 0 0 20px rgba(96,165,250,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .tz-label {
+      font-size:0.6rem; color:#f9a8d4;
+      letter-spacing:1.5px; text-transform:uppercase; margin-bottom:3px;
+    }
+    .tz-block.highlight .tz-label { color:#93c5fd; }
+    .tz-time {
+      font-size:1.55rem; font-weight:700;
+      color:#fff; letter-spacing:2px;
+      font-variant-numeric:tabular-nums;
+    }
+    .tz-time.done { color:#f472b6; }
+    .tz-dot {
+      width:8px; height:8px; border-radius:50%;
+      background:rgba(244,114,182,0.4);
+      flex-shrink:0; margin-top:44px;
+    }
+    .tz-dot.active-dot { background:#f472b6; box-shadow:0 0 6px #f472b6; }
+    /* dot row */
+    #dot-row {
+      position:absolute;
+      bottom:-14px; left:50%;
+      transform:translateX(-50%);
+      display:flex; gap:6px;
+      z-index:21;
+    }
+
+    /* ── Pole ── */
+    #pole {
+      position:absolute;
+      left:50%; top:0;
+      transform:translateX(-50%);
+      width:3px; height:480px;
+      background:linear-gradient(to bottom, #ec4899 0%, #3b82f6 60%, #1e1b4b 100%);
+      border-radius:2px;
+      box-shadow: 0 0 8px rgba(236,72,153,0.4);
+      z-index:13;
+    }
 
     /* ── Ball ── */
-    #ball-track {
-      position: absolute;
-      left: 50%; top: 0;
-      transform: translateX(-50%);
-      width: 6px; height: 480px;
-      z-index: 15;
-    }
-    #pole {
-      position: absolute;
-      left: 50%; top: 0;
-      transform: translateX(-50%);
-      width: 3px; height: 480px;
-      background: linear-gradient(to bottom, #6d28d9, #1e1b4b);
-      border-radius: 2px;
-    }
     #ball {
-      position: absolute;
-      left: 50%; top: 0;
-      transform: translate(-50%, -50%);
-      width: 52px; height: 52px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #fff 5%, #f9a8d4 25%, #c084fc 55%, #7c3aed 100%);
-      box-shadow: 0 0 20px 6px #c084fc, 0 0 40px 10px #7c3aed55;
-      transition: top 2s cubic-bezier(.4,0,.2,1);
-      z-index: 16;
+      position:absolute;
+      left:50%; top:0;
+      transform:translate(-50%, -50%);
+      width:54px; height:54px;
+      border-radius:50%;
+      background:radial-gradient(circle at 35% 35%, #fff 4%, #fbcfe8 22%, #ec4899 52%, #1d4ed8 100%);
+      box-shadow:
+        0 0 18px 5px rgba(236,72,153,0.7),
+        0 0 40px 10px rgba(59,130,246,0.35);
+      transition: top 2.2s cubic-bezier(.4,0,.2,1);
+      z-index:16;
     }
-    #ball.dropped { top: 480px; }
+    #ball.dropped { top:480px; }
 
     /* ── Message ── */
     #message {
-      position: absolute;
-      bottom: 60px; left: 50%;
-      transform: translateX(-50%);
-      font-size: 2.8rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, #ff69b4, #c084fc, #60a5fa, #fbbf24);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-align: center;
-      white-space: nowrap;
-      opacity: 0;
-      transition: opacity 1s ease 0.5s;
-      z-index: 25;
-      text-shadow: none;
-      filter: drop-shadow(0 0 12px #c084fc);
+      position:absolute;
+      bottom:54px; left:50%;
+      transform:translateX(-50%);
+      font-size:2.75rem; font-weight:700;
+      background:linear-gradient(135deg, #f472b6, #60a5fa, #f9a8d4, #93c5fd);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      text-align:center; white-space:nowrap;
+      opacity:0;
+      transition:opacity 1s ease 0.4s;
+      z-index:25;
+      filter:drop-shadow(0 0 14px rgba(244,114,182,0.8));
     }
-    #message.show { opacity: 1; }
+    #message.show { opacity:1; }
 
     /* ── Canvas layers ── */
     canvas {
-      position: absolute;
-      top: 0; left: 0;
-      width: 900px; height: 600px;
-      pointer-events: none;
+      position:absolute; top:0; left:0;
+      width:900px; height:600px;
+      pointer-events:none;
     }
-    #fireworks-canvas { z-index: 10; }
-    #confetti-canvas  { z-index: 11; }
-    #sparkle-canvas   { z-index: 12; }
+    #fireworks-canvas { z-index:10; }
+    #confetti-canvas  { z-index:11; }
+    #sparkle-canvas   { z-index:12; }
 
-    /* ── Test button (hidden in overlay.html) ── */
-    #test-btn { display: none; }
+    #test-btn { display:none; }
   </style>
 </head>
 <body>
 <div id="scene">
+  <div id="bg-glow"></div>
   <canvas id="fireworks-canvas" width="900" height="600"></canvas>
   <canvas id="confetti-canvas"  width="900" height="600"></canvas>
   <canvas id="sparkle-canvas"   width="900" height="600"></canvas>
 
   <div id="countdown-wrap">
-    <div class="tz-block"><div class="tz-label">Eastern</div><div class="tz-time" id="ct-et">--:--:--</div></div>
-    <div class="tz-block"><div class="tz-label">Central</div><div class="tz-time" id="ct-ct">--:--:--</div></div>
-    <div class="tz-block"><div class="tz-label">Mountain</div><div class="tz-time" id="ct-mt">--:--:--</div></div>
-    <div class="tz-block"><div class="tz-label">Pacific</div><div class="tz-time" id="ct-pt">--:--:--</div></div>
+    <!-- stages injected by JS -->
+    <div id="dot-row"></div>
   </div>
 
   <div id="pole"></div>
@@ -121,258 +168,257 @@
 </div>
 
 <script>
-// ─────────── Config ───────────
-const BDAY_MONTH = 7;  // July (1-based)
+// ─── Config ───────────────────────────────────────────────────
+const BDAY_MONTH = 7;
 const BDAY_DAY   = 16;
 const ZONES = [
-  { id: 'ct-et', tz: 'America/New_York' },
-  { id: 'ct-ct', tz: 'America/Chicago' },
-  { id: 'ct-mt', tz: 'America/Denver' },
-  { id: 'ct-pt', tz: 'America/Los_Angeles' },
+  { label:'Eastern',  tz:'America/New_York',    abbr:'ET' },
+  { label:'Central',  tz:'America/Chicago',     abbr:'CT' },
+  { label:'Mountain', tz:'America/Denver',      abbr:'MT' },
+  { label:'Pacific',  tz:'America/Los_Angeles', abbr:'PT' },
 ];
+// How many zones per rotator stage (2 = pairs, 4 = all at once)
+const PER_STAGE  = 2;   // show 2 zones at a time, rotate every N seconds
+const ROTATE_SEC = 5;   // seconds between rotations
 
-// ─────────── Helpers ───────────
-function targetMidnight(tz) {
-  // Returns Date of next (or current) July 16 midnight in given tz
-  const now = new Date();
-  // Build a date string for this year's birthday midnight in tz
-  const year = new Date().toLocaleString('en-US', { timeZone: tz, year: 'numeric' }).replace(/[^0-9]/g,'').slice(0,4);
-  // Use Intl to find if we've passed midnight July 16
-  const bdayStr = `${year}-${String(BDAY_MONTH).padStart(2,'0')}-${String(BDAY_DAY).padStart(2,'0')}T00:00:00`;
-  // Create a UTC equivalent of midnight in tz
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: tz,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+// ─── Build rotator stages ─────────────────────────────────────
+// stages = [[zone0,zone1],[zone2,zone3]]
+const stages = [];
+for (let i = 0; i < ZONES.length; i += PER_STAGE) stages.push(ZONES.slice(i, i+PER_STAGE));
+
+const wrap = document.getElementById('countdown-wrap');
+const dotRow = document.getElementById('dot-row');
+
+// Build stage divs
+const stageDivs = stages.map((group, si) => {
+  const div = document.createElement('div');
+  div.className = 'tz-stage' + (si===0 ? ' active' : '');
+  group.forEach((z, zi) => {
+    const block = document.createElement('div');
+    block.className = 'tz-block' + (zi===0 ? ' highlight' : '');
+    block.innerHTML =
+      `<div class="tz-label">${z.label} (${z.abbr})</div>` +
+      `<div class="tz-time" id="ct-${z.abbr.toLowerCase()}">--:--:--</div>`;
+    div.appendChild(block);
   });
-  // Find offset by comparing local midnight
-  const trial = new Date(`${new Date().getFullYear()}-${String(BDAY_MONTH).padStart(2,'0')}-${String(BDAY_DAY).padStart(2,'0')}T00:00:00`);
-  // Shift to proper tz midnight via binary search approximation
-  let lo = new Date(trial.getTime() - 14*3600000);
-  let hi = new Date(trial.getTime() + 14*3600000);
-  for (let i = 0; i < 40; i++) {
-    const mid = new Date((lo.getTime() + hi.getTime()) / 2);
-    const parts = formatter.formatToParts(mid);
-    const p = {}; parts.forEach(x => p[x.type] = x.value);
-    const h = parseInt(p.hour), m = parseInt(p.minute), s = parseInt(p.second);
-    const d = parseInt(p.day), mo = parseInt(p.month);
-    if (mo === BDAY_MONTH && d === BDAY_DAY && h === 0 && m === 0 && s === 0) return mid;
-    const past = (mo > BDAY_MONTH) || (mo === BDAY_MONTH && d > BDAY_DAY) ||
-                 (mo === BDAY_MONTH && d === BDAY_DAY && (h > 0 || m > 0 || s > 0));
-    if (past) hi = mid; else lo = mid;
+  wrap.insertBefore(div, dotRow);
+  return div;
+});
+
+// Build dots
+stages.forEach((_, si) => {
+  const dot = document.createElement('div');
+  dot.className = 'tz-dot' + (si===0 ? ' active-dot' : '');
+  dotRow.appendChild(dot);
+});
+
+let currentStage = 0;
+function rotateTo(next) {
+  stageDivs[currentStage].classList.remove('active');
+  stageDivs[currentStage].classList.add('exit');
+  setTimeout(() => stageDivs[currentStage].classList.remove('exit'), 600);
+  dotRow.children[currentStage].classList.remove('active-dot');
+  currentStage = next;
+  stageDivs[currentStage].classList.add('active');
+  dotRow.children[currentStage].classList.add('active-dot');
+}
+setInterval(() => rotateTo((currentStage + 1) % stages.length), ROTATE_SEC * 1000);
+
+// ─── Countdown to midnight July 16 per TZ ─────────────────────
+function targetMidnight(tz) {
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+  });
+  let lo = new Date(new Date().getFullYear(), BDAY_MONTH-1, BDAY_DAY, 0, 0, 0);
+  lo = new Date(lo.getTime() - 14*3600000);
+  let hi = new Date(lo.getTime() + 28*3600000);
+  for (let i=0; i<40; i++) {
+    const mid = new Date((lo.getTime()+hi.getTime())/2);
+    const p = {}; fmt.formatToParts(mid).forEach(x=>p[x.type]=x.value);
+    const h=+p.hour,m=+p.minute,s=+p.second,d=+p.day,mo=+p.month;
+    if (mo===BDAY_MONTH&&d===BDAY_DAY&&h===0&&m===0&&s===0) return mid;
+    const past=(mo>BDAY_MONTH)||(mo===BDAY_MONTH&&d>BDAY_DAY)||
+               (mo===BDAY_MONTH&&d===BDAY_DAY&&(h>0||m>0||s>0));
+    if(past)hi=mid; else lo=mid;
   }
   return lo;
 }
 
-function secsUntil(target) {
-  return Math.max(0, Math.floor((target - Date.now()) / 1000));
-}
-
-function fmtCountdown(secs) {
-  if (secs <= 0) return 'NOW! 🎂';
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  const s = secs % 60;
-  if (h > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
-
-// ─────────── Targets ───────────
 const targets = {};
-ZONES.forEach(z => { targets[z.id] = targetMidnight(z.tz); });
+ZONES.forEach(z => { targets[z.abbr.toLowerCase()] = targetMidnight(z.tz); });
 
-// ─────────── Countdown tick ───────────
+function secsUntil(t) { return Math.max(0, Math.floor((t-Date.now())/1000)); }
+function fmt(s) {
+  if(s<=0) return 'NOW! 🎂';
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;
+  return h>0
+    ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`
+    : `${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`;
+}
+
+// ─── Ball drop: hourly + midnight ─────────────────────────────
+// The ball drops:
+//   1. Every hour on the hour (minor drop — shorter distance)
+//   2. At midnight ET on July 16 (full drop + celebration)
+const ball = document.getElementById('ball');
+const msg  = document.getElementById('message');
 let celebrated = false;
-function tickCountdown() {
-  let anyDone = false;
-  ZONES.forEach(z => {
-    const s = secsUntil(targets[z.id]);
-    const el = document.getElementById(z.id);
-    el.textContent = fmtCountdown(s);
-    if (s === 0) { el.classList.add('done'); anyDone = true; }
-  });
-  // Trigger when the first timezone (ET) hits 0
-  const etSecs = secsUntil(targets['ct-et']);
-  if (etSecs <= 0 && !celebrated) triggerCelebration();
-}
-setInterval(tickCountdown, 1000);
-tickCountdown();
-
-// ─────────── Ball Drop ───────────
 let ballDropped = false;
-function dropBall() {
-  if (ballDropped) return;
+let lastHour = new Date().getHours();
+
+function fullDrop() {
+  if(ballDropped) return;
   ballDropped = true;
-  document.getElementById('ball').classList.add('dropped');
-  setTimeout(() => {
-    document.getElementById('message').classList.add('show');
-  }, 2200);
+  ball.style.transition = 'top 2.2s cubic-bezier(.4,0,.2,1)';
+  ball.classList.add('dropped'); // top: 480px
+  setTimeout(()=>{ msg.classList.add('show'); }, 2400);
 }
 
-// ─────────── Celebration ───────────
+function hourlyDrop() {
+  // Short animated drop then reset
+  ball.style.transition = 'top 1.4s cubic-bezier(.4,0,.2,1)';
+  ball.style.top = '380px';
+  setTimeout(() => {
+    ball.style.transition = 'top 0.8s cubic-bezier(.2,0,.6,1)';
+    ball.style.top = '0px';
+  }, 2000);
+}
+
 function triggerCelebration() {
-  if (celebrated) return;
+  if(celebrated) return;
   celebrated = true;
-  dropBall();
+  fullDrop();
   launchFireworks();
   startConfetti();
   startSparkles();
 }
 
-// Test button
+// Tick: countdown + hourly check
+function tick() {
+  ZONES.forEach(z => {
+    const key = z.abbr.toLowerCase();
+    const el = document.getElementById('ct-'+key);
+    if(!el) return;
+    const s = secsUntil(targets[key]);
+    el.textContent = fmt(s);
+    if(s===0) el.classList.add('done');
+  });
+  // Full celebration at midnight ET
+  if(secsUntil(targets['et'])<=0 && !celebrated) triggerCelebration();
+  // Hourly mini-drop (not after celebration)
+  const now = new Date();
+  if(!celebrated && now.getHours()!==lastHour && now.getMinutes()===0 && now.getSeconds()<2) {
+    lastHour = now.getHours();
+    hourlyDrop();
+  }
+}
+setInterval(tick, 1000);
+tick();
+
 document.getElementById('test-btn').addEventListener('click', () => {
-  celebrated = false; ballDropped = false;
-  document.getElementById('ball').classList.remove('dropped');
-  document.getElementById('message').classList.remove('show');
-  setTimeout(triggerCelebration, 100);
+  celebrated=false; ballDropped=false;
+  ball.style.transition='none'; ball.style.top='0px'; ball.classList.remove('dropped');
+  msg.classList.remove('show');
+  setTimeout(triggerCelebration, 80);
 });
 
-// ─────────── Fireworks ───────────
-const fwC = document.getElementById('fireworks-canvas');
-const fwCtx = fwC.getContext('2d');
-let fireworksActive = false;
-let fireworks = [], fwParticles = [];
-
-function launchFireworks() {
-  fireworksActive = true;
-  setTimeout(() => { fireworksActive = false; }, 8000);
-  requestAnimationFrame(drawFireworks);
+// ─── Fireworks ────────────────────────────────────────────────
+const fwC=document.getElementById('fireworks-canvas'),fwCtx=fwC.getContext('2d');
+let fireworksActive=false,fireworks=[],fwParticles=[];
+const FW_COLORS=['#f472b6','#fb7185','#60a5fa','#93c5fd','#e879f9','#f9a8d4','#bfdbfe','#fff'];
+function launchFireworks(){
+  fireworksActive=true;
+  setTimeout(()=>{fireworksActive=false;},9000);
+  requestAnimationFrame(drawFW);
 }
-
-function drawFireworks() {
-  fwCtx.fillStyle = 'rgba(0,0,0,0)';
-  fwCtx.clearRect(0, 0, 900, 600);
-  fwCtx.fillStyle = 'rgba(0,0,0,0.15)';
-  fwCtx.fillRect(0, 0, 900, 600);
-
-  if (fireworksActive && Math.random() < 0.06) {
-    fireworks.push({
-      x: 150 + Math.random() * 600,
-      y: 500, tx: 150 + Math.random() * 600,
-      ty: 60 + Math.random() * 260,
-      color: `hsl(${Math.random()*360},100%,60%)`,
-      speed: 8 + Math.random() * 4, exploded: false
-    });
+function drawFW(){
+  fwCtx.clearRect(0,0,900,600);
+  fwCtx.fillStyle='rgba(0,0,0,0.12)'; fwCtx.fillRect(0,0,900,600);
+  if(fireworksActive&&Math.random()<0.07){
+    fireworks.push({x:120+Math.random()*660,y:520,tx:120+Math.random()*660,ty:50+Math.random()*280,
+      color:FW_COLORS[Math.floor(Math.random()*FW_COLORS.length)],speed:8+Math.random()*5});
   }
-
-  fireworks = fireworks.filter(f => {
-    const dx = f.tx - f.x, dy = f.ty - f.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    if (dist < f.speed) {
-      // explode
-      for (let i = 0; i < 60; i++) {
-        const a = (Math.PI*2/60)*i;
-        const sp = 2 + Math.random()*4;
-        fwParticles.push({ x: f.x, y: f.y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
-          color: f.color, life: 1 });
+  fireworks=fireworks.filter(f=>{
+    const dx=f.tx-f.x,dy=f.ty-f.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<f.speed){
+      for(let i=0;i<65;i++){
+        const a=(Math.PI*2/65)*i,sp=1.8+Math.random()*4.5;
+        fwParticles.push({x:f.x,y:f.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,color:f.color,life:1});
       }
       return false;
     }
-    f.x += (dx/dist)*f.speed;
-    f.y += (dy/dist)*f.speed;
-    fwCtx.beginPath();
-    fwCtx.arc(f.x, f.y, 3, 0, Math.PI*2);
-    fwCtx.fillStyle = f.color;
-    fwCtx.fill();
+    f.x+=(dx/dist)*f.speed; f.y+=(dy/dist)*f.speed;
+    fwCtx.beginPath(); fwCtx.arc(f.x,f.y,3,0,Math.PI*2);
+    fwCtx.fillStyle=f.color; fwCtx.fill();
     return true;
   });
-
-  fwParticles = fwParticles.filter(p => {
-    p.x += p.vx; p.y += p.vy + 0.06;
-    p.vx *= 0.97; p.vy *= 0.97;
-    p.life -= 0.018;
-    fwCtx.globalAlpha = p.life;
-    fwCtx.beginPath();
-    fwCtx.arc(p.x, p.y, 2.5, 0, Math.PI*2);
-    fwCtx.fillStyle = p.color;
-    fwCtx.fill();
-    fwCtx.globalAlpha = 1;
-    return p.life > 0;
+  fwParticles=fwParticles.filter(p=>{
+    p.x+=p.vx; p.y+=p.vy+0.07; p.vx*=0.97; p.vy*=0.97; p.life-=0.017;
+    fwCtx.globalAlpha=p.life;
+    fwCtx.beginPath(); fwCtx.arc(p.x,p.y,2.5,0,Math.PI*2);
+    fwCtx.fillStyle=p.color; fwCtx.fill(); fwCtx.globalAlpha=1;
+    return p.life>0;
   });
-
-  if (fireworks.length || fwParticles.length || fireworksActive) requestAnimationFrame(drawFireworks);
+  if(fireworks.length||fwParticles.length||fireworksActive) requestAnimationFrame(drawFW);
   else fwCtx.clearRect(0,0,900,600);
 }
 
-// ─────────── Confetti ───────────
-const cfC = document.getElementById('confetti-canvas');
-const cfCtx = cfC.getContext('2d');
-let confettiActive = false, confettiPieces = [];
-const CF_COLORS = ['#ff69b4','#c084fc','#60a5fa','#fbbf24','#34d399','#f87171','#fff'];
-
-function startConfetti() {
-  confettiActive = true;
-  setTimeout(() => { confettiActive = false; }, 8000);
-  requestAnimationFrame(drawConfetti);
+// ─── Confetti ─────────────────────────────────────────────────
+const cfC=document.getElementById('confetti-canvas'),cfCtx=cfC.getContext('2d');
+let confettiActive=false,cfPieces=[];
+const CF=['#f472b6','#fb7185','#60a5fa','#93c5fd','#e879f9','#fbbf24','#fff','#f9a8d4'];
+function startConfetti(){
+  confettiActive=true;
+  setTimeout(()=>{confettiActive=false;},9000);
+  requestAnimationFrame(drawCF);
 }
-
-function drawConfetti() {
-  cfCtx.clearRect(0, 0, 900, 600);
-  if (confettiActive && Math.random() < 0.35) {
-    for (let i = 0; i < 3; i++) {
-      confettiPieces.push({
-        x: Math.random()*900, y: -10,
-        w: 6+Math.random()*8, h: 10+Math.random()*6,
-        color: CF_COLORS[Math.floor(Math.random()*CF_COLORS.length)],
-        vx: (Math.random()-0.5)*3, vy: 2+Math.random()*3,
-        rot: Math.random()*Math.PI*2, rotV: (Math.random()-0.5)*0.15
-      });
-    }
+function drawCF(){
+  cfCtx.clearRect(0,0,900,600);
+  if(confettiActive&&Math.random()<0.4){
+    for(let i=0;i<4;i++) cfPieces.push({x:Math.random()*900,y:-12,
+      w:5+Math.random()*9,h:9+Math.random()*7,
+      color:CF[Math.floor(Math.random()*CF.length)],
+      vx:(Math.random()-0.5)*3.5,vy:2+Math.random()*3.5,
+      rot:Math.random()*Math.PI*2,rotV:(Math.random()-0.5)*0.18});
   }
-  confettiPieces = confettiPieces.filter(p => {
-    p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
-    cfCtx.save();
-    cfCtx.translate(p.x, p.y);
-    cfCtx.rotate(p.rot);
-    cfCtx.fillStyle = p.color;
-    cfCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-    cfCtx.restore();
-    return p.y < 620;
+  cfPieces=cfPieces.filter(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV;
+    cfCtx.save(); cfCtx.translate(p.x,p.y); cfCtx.rotate(p.rot);
+    cfCtx.fillStyle=p.color; cfCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    cfCtx.restore(); return p.y<620;
   });
-  if (confettiPieces.length || confettiActive) requestAnimationFrame(drawConfetti);
+  if(cfPieces.length||confettiActive) requestAnimationFrame(drawCF);
 }
 
-// ─────────── Sparkles ───────────
-const spC = document.getElementById('sparkle-canvas');
-const spCtx = spC.getContext('2d');
-let sparklesActive = false, sparkles = [];
-
-function startSparkles() {
-  sparklesActive = true;
-  setTimeout(() => { sparklesActive = false; }, 9000);
-  requestAnimationFrame(drawSparkles);
+// ─── Sparkles ─────────────────────────────────────────────────
+const spC=document.getElementById('sparkle-canvas'),spCtx=spC.getContext('2d');
+let sparklesActive=false,sparkles=[];
+function startSparkles(){
+  sparklesActive=true;
+  setTimeout(()=>{sparklesActive=false;},10000);
+  requestAnimationFrame(drawSP);
 }
-
-function drawSparkles() {
+function drawSP(){
   spCtx.clearRect(0,0,900,600);
-  if (sparklesActive && Math.random() < 0.4) {
-    sparkles.push({
-      x: Math.random()*900, y: Math.random()*600,
-      r: 1 + Math.random()*3, life: 1,
-      color: `hsl(${280+Math.random()*80},100%,80%)`
-    });
+  if(sparklesActive&&Math.random()<0.45){
+    const hue=Math.random()<0.5?330+Math.random()*30:200+Math.random()*30;
+    sparkles.push({x:Math.random()*900,y:Math.random()*600,
+      r:1+Math.random()*3.5,life:1,color:`hsl(${hue},100%,78%)`});
   }
-  sparkles = sparkles.filter(s => {
-    s.life -= 0.03;
-    spCtx.globalAlpha = s.life;
+  sparkles=sparkles.filter(s=>{
+    s.life-=0.028; spCtx.globalAlpha=s.life;
     spCtx.beginPath();
-    // 4-point star
-    const r = s.r, x = s.x, y = s.y;
-    spCtx.moveTo(x, y-r*3);
-    spCtx.lineTo(x+r*0.7, y-r*0.7);
-    spCtx.lineTo(x+r*3, y);
-    spCtx.lineTo(x+r*0.7, y+r*0.7);
-    spCtx.lineTo(x, y+r*3);
-    spCtx.lineTo(x-r*0.7, y+r*0.7);
-    spCtx.lineTo(x-r*3, y);
-    spCtx.lineTo(x-r*0.7, y-r*0.7);
-    spCtx.closePath();
-    spCtx.fillStyle = s.color;
-    spCtx.fill();
-    spCtx.globalAlpha = 1;
-    return s.life > 0;
+    const r=s.r,x=s.x,y=s.y;
+    spCtx.moveTo(x,y-r*3); spCtx.lineTo(x+r*.7,y-r*.7);
+    spCtx.lineTo(x+r*3,y); spCtx.lineTo(x+r*.7,y+r*.7);
+    spCtx.lineTo(x,y+r*3); spCtx.lineTo(x-r*.7,y+r*.7);
+    spCtx.lineTo(x-r*3,y); spCtx.lineTo(x-r*.7,y-r*.7);
+    spCtx.closePath(); spCtx.fillStyle=s.color; spCtx.fill();
+    spCtx.globalAlpha=1; return s.life>0;
   });
-  if (sparkles.length || sparklesActive) requestAnimationFrame(drawSparkles);
+  if(sparkles.length||sparklesActive) requestAnimationFrame(drawSP);
 }
 </script>
 </body>
